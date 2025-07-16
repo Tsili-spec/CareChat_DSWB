@@ -1,7 +1,7 @@
 # UI/UX Branch for Track 1: Patient Feedback and Reminder Management System
 
 ## Overview
-The `UI/UX` branch of the [DGH-Datathon repository](https://github.com/your-username/your-repo) is dedicated to storing and collaborating on UI/UX design assets for 
+The `UI/UX` branch of the (https://github.com/Tsili-spec/CareChat_DSWB.git) is dedicated to storing and collaborating on UI/UX design assets for 
 **Track 1: Patient Feedback and Reminder Management System**. This branch contains wireframes, mockups, prototypes, and related design files for patient-facing (e.g., Feedback Interface, Reminder Confirmation) and admin-facing (e.g., Feedback Analysis Dashboard) pages.
 
 ## Purpose
