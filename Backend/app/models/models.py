@@ -1,0 +1,47 @@
+from sqlalchemy import Column, String, Integer, Float, Text, TIMESTAMP, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
+from app.db.database import Base
+
+class Patient(Base):
+    __tablename__ = "patients"
+    patient_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    first_name = Column(String(100))
+    last_name = Column(String(100))
+    phone_number = Column(String(20))
+    email = Column(String(255))
+    preferred_language = Column(String(10))
+    created_at = Column(TIMESTAMP)
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+    feedback_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    patient_id = Column(UUID(as_uuid=True), ForeignKey("patients.patient_id"))
+    feedback_text = Column(Text)
+    translated_text = Column(Text)
+    rating = Column(Integer)
+    sentiment = Column(String(20))
+    sentiment_score = Column(Float)
+    language = Column(String(10))
+    status = Column(String(20))
+    created_at = Column(TIMESTAMP)
+
+class Reminder(Base):
+    __tablename__ = "reminders"
+    reminder_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    patient_id = Column(UUID(as_uuid=True), ForeignKey("patients.patient_id"))
+    reminder_type = Column(String(50))
+    message = Column(Text)
+    scheduled_time = Column(TIMESTAMP)
+    channel = Column(String(20))
+    status = Column(String(20))
+    attempts = Column(Integer)
+    created_at = Column(TIMESTAMP)
+
+class ReminderDelivery(Base):
+    __tablename__ = "reminder_delivery"
+    delivery_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    reminder_id = Column(UUID(as_uuid=True), ForeignKey("reminders.reminder_id"))
+    sent_at = Column(TIMESTAMP)
+    delivery_status = Column(String(20))
+    provider_response = Column(Text)
