@@ -1,16 +1,14 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from uuid import UUID
 from datetime import datetime
 
 class ReminderBase(BaseModel):
     patient_id: UUID
-    reminder_type: Optional[str] = None
-    message: Optional[str] = None
-    scheduled_time: Optional[datetime] = None
-    channel: Optional[str] = None
-    status: Optional[str] = None
-    attempts: Optional[int] = None
+    message: str
+    scheduled_time: List[datetime]
+    days: List[str]
+    status: str
 
 class ReminderCreate(ReminderBase):
     pass

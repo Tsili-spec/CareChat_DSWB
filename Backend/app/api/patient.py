@@ -70,10 +70,19 @@ def login(login_data: PatientLogin, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     access_token = create_access_token({"sub": str(patient.patient_id)})
     refresh_token = create_refresh_token({"sub": str(patient.patient_id)})
+    patient_info = {
+        "patient_id": str(patient.patient_id),
+        "first_name": patient.first_name,
+        "last_name": patient.last_name,
+        "phone_number": patient.phone_number,
+        "email": patient.email,
+        "preferred_language": patient.preferred_language
+    }
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "patient": patient_info
     }
 
 @router.post("/refresh")
