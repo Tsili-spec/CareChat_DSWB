@@ -5,13 +5,13 @@ from datetime import datetime
 
 class FeedbackBase(BaseModel):
     patient_id: UUID
-    feedback_text: Optional[str] = None
-    translated_text: Optional[str] = None
     rating: Optional[int] = None
+    feedback_text: Optional[str] = None
+    audio: Optional[str] = None
+    language: str
     sentiment: Optional[str] = None
-    sentiment_score: Optional[float] = None
-    language: Optional[str] = None
-    status: Optional[str] = None
+    topic: Optional[str] = None
+    urgency: Optional[str] = None
 
 class FeedbackCreate(FeedbackBase):
     pass

@@ -21,9 +21,9 @@ class Feedback(Base):
     translated_text = Column(Text)
     rating = Column(Integer)
     sentiment = Column(String(20))
-    sentiment_score = Column(Float)
+    topic = Column(String(50))
+    urgency = Column(String(10))
     language = Column(String(10))
-    status = Column(String(20))
     created_at = Column(TIMESTAMP)
 
 class Reminder(Base):
