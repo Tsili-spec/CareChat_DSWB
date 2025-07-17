@@ -29,8 +29,5 @@ twilio
 python-jose
 passlib
 
-# NLLB-200 translation dependencies
-transformers
-sentencepiece
-torch
+
 
