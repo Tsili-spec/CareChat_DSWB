@@ -19,10 +19,12 @@ python-dotenv
 # Pydantic settings
 pydantic-settings
 
-# NLLB-200 translation dependencies
-transformers
-torch
-sentencepiece
-
 # FastAPI form data support
 python-multipart
+
+# NLLB-200 translation dependencies
+transformers
+sentencepiece
+torch
+
+
