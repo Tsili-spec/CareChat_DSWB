@@ -8,7 +8,7 @@ sqlalchemy==2.0.30
 psycopg2-binary==2.9.9
 
 # Pydantic for schema validation
-pydantic==2.7.1
+pydantic==1.10.14
 
 # Translation service
 textblob==0.18.0
