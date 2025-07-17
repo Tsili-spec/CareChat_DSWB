@@ -4,7 +4,6 @@ from app.db.database import get_db
 from app.models.models import Feedback as FeedbackModel
 from app.schemas.feedback import Feedback, FeedbackCreate
 from app.services.analysis import analyze_feedback
-from app.services.translation import translate_to_english
 
 router = APIRouter()
 
@@ -18,13 +17,11 @@ async def create_feedback(
     db: Session = Depends(get_db)
 ):
     if feedback_text:
-        translated_text = feedback_text
-        analysis = analyze_feedback(text=translated_text, rating=rating)
+        analysis = analyze_feedback(text=feedback_text, rating=rating)
         sentiment = analysis.get("sentiment")
         topic = analysis.get("topics") if analysis.get("sentiment") == "negative" else None
         urgency = "urgent" if analysis.get("urgent_flag") else "not urgent"
     else:
-        translated_text = ""
         analysis = analyze_feedback(rating=rating)
         sentiment = analysis.get("sentiment")
         topic = None
@@ -33,7 +30,7 @@ async def create_feedback(
         patient_id=patient_id,
         rating=rating,
         feedback_text=feedback_text,
-        translated_text=translated_text,
+        translated_text=feedback_text,
         language=language,
         sentiment=sentiment,
         topic=topic,
