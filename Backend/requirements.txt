@@ -29,6 +29,6 @@ twilio
 python-jose
 passlib
 
-bycript
+bycrypt
 
 
