@@ -12,6 +12,7 @@ class Patient(Base):
     email = Column(String(255))
     preferred_language = Column(String(10))
     created_at = Column(TIMESTAMP)
+    password_hash = Column(String(255))
 
 class Feedback(Base):
     __tablename__ = "feedback"
