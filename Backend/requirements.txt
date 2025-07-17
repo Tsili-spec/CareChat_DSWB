@@ -18,3 +18,8 @@ python-dotenv
 
 # Pydantic settings
 pydantic-settings
+
+
+
+# FastAPI form data support
+python-multipart
