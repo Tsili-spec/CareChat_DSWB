@@ -15,3 +15,6 @@ textblob
 
 # Other utilities
 python-dotenv
+
+# Pydantic settings
+pydantic-settings
