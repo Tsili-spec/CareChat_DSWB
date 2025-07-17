@@ -18,12 +18,13 @@ async def create_feedback(
     db: Session = Depends(get_db)
 ):
     if feedback_text:
-        text_for_analysis = feedback_text
         translated_text = translate_to_english(feedback_text, language)
-        analysis = analyze_feedback(text=text_for_analysis, rating=rating)
+        # Always analyze the translated (English) text
+        analysis = analyze_feedback(text=translated_text, rating=rating)
         sentiment = analysis.get("sentiment")
         topic = analysis.get("topics") if analysis.get("sentiment") == "negative" else None
         urgency = "urgent" if analysis.get("urgent_flag") else "not urgent"
+        text_for_analysis = translated_text
     else:
         text_for_analysis = ""
         translated_text = ""

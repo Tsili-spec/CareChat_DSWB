@@ -7,6 +7,7 @@ class FeedbackBase(BaseModel):
     patient_id: UUID
     rating: Optional[int] = None
     feedback_text: Optional[str] = None
+    translated_text: Optional[str] = None
     language: str
     sentiment: Optional[str] = None
     topic: Optional[str] = None

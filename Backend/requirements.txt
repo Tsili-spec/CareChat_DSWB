@@ -1,0 +1,17 @@
+
+# FastAPI backend
+fastapi==0.110.2
+uvicorn==0.29.0
+
+# Database
+sqlalchemy==2.0.30
+psycopg2-binary==2.9.9
+
+# Pydantic for schema validation
+pydantic==2.7.1
+
+# Translation service
+textblob==0.18.0
+
+# Other utilities
+python-dotenv==1.0.1
