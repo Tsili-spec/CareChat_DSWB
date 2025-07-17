@@ -10,8 +10,13 @@ class PatientBase(BaseModel):
     email: Optional[str] = None
     preferred_language: Optional[str] = None
 
+
 class PatientCreate(PatientBase):
-    pass
+    password: str
+
+class PatientLogin(BaseModel):
+    mobile_number: str
+    password: str
 
 class Patient(PatientBase):
     patient_id: UUID

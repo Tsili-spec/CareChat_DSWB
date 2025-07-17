@@ -27,4 +27,7 @@ transformers
 sentencepiece
 torch
 
+# Twilio SMS/voice integration
+twilio
+
 
