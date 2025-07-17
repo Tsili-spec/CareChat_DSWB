@@ -21,8 +21,8 @@ class Feedback(Base):
     translated_text = Column(Text)
     rating = Column(Integer)
     sentiment = Column(String(20))
-    topic = Column(String(50))
-    urgency = Column(String(10))
+    topic = Column(String(50), nullable=True)
+    urgency = Column(String(10), nullable=True)
     language = Column(String(10))
     created_at = Column(TIMESTAMP)
 

@@ -1,24 +1,42 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.models import Feedback as FeedbackModel
 from app.schemas.feedback import Feedback, FeedbackCreate
 from app.services.analysis import analyze_feedback
+from app.services.translation import translate_to_english
 
 router = APIRouter()
 
 @router.post("/feedback/", response_model=Feedback)
-def create_feedback(feedback: FeedbackCreate, db: Session = Depends(get_db)):
-    analysis = analyze_feedback(text=feedback.feedback_text, rating=feedback.rating)
-    sentiment = analysis.get("sentiment")
-    topic = analysis.get("topics") if analysis.get("sentiment") == "negative" else None
-    urgency = "urgent" if analysis.get("urgent_flag") else "not urgent"
+async def create_feedback(
+    patient_id: str = Form(...),
+    rating: int = Form(None),
+    feedback_text: str = Form(None),
+    language: str = Form(...),
+    # audio removed
+    db: Session = Depends(get_db)
+):
+    if feedback_text:
+        text_for_analysis = feedback_text
+        translated_text = translate_to_english(feedback_text, language)
+        analysis = analyze_feedback(text=text_for_analysis, rating=rating)
+        sentiment = analysis.get("sentiment")
+        topic = analysis.get("topics") if analysis.get("sentiment") == "negative" else None
+        urgency = "urgent" if analysis.get("urgent_flag") else "not urgent"
+    else:
+        text_for_analysis = ""
+        translated_text = ""
+        analysis = analyze_feedback(rating=rating)
+        sentiment = analysis.get("sentiment")
+        topic = None
+        urgency = None
     db_feedback = FeedbackModel(
-        patient_id=feedback.patient_id,
-        rating=feedback.rating,
-        feedback_text=feedback.feedback_text,
-        translated_text=feedback.feedback_text,  # translation not implemented
-        language=feedback.language,
+        patient_id=patient_id,
+        rating=rating,
+        feedback_text=text_for_analysis,
+        translated_text=translated_text,
+        language=language,
         sentiment=sentiment,
         topic=topic,
         urgency=urgency

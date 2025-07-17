@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.post("/patient/", response_model=Patient)
 def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
-    db_patient = PatientModel(**patient.dict())
+    db_patient = PatientModel(**patient.model_dump())
     db.add(db_patient)
     db.commit()
     db.refresh(db_patient)

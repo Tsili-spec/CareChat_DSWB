@@ -28,7 +28,7 @@ def get_sentiment_from_rating(rating: int) -> str:
 
 def extract_topics(text: str) -> List[str]:
     topic_keywords = {
-        "wait_time": ["wait", "delay", "long queue", "waiting", "slow"],
+        "wait_time": ["wait", "delay", "long queue", "waiting", "slow", "waited"],
         "staff_attitude": ["rude", "impolite", "shouted", "disrespectful", "unfriendly", "nonchalant", "care"],
         "medication": ["drug", "pill", "prescription", "medication", "dose", "tablet"],
         "cost": ["expensive", "bill", "cost", "money", "price"]

@@ -16,5 +16,6 @@ class PatientCreate(PatientBase):
 class Patient(PatientBase):
     patient_id: UUID
     created_at: Optional[datetime] = None
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
