@@ -22,12 +22,15 @@ pydantic-settings
 # FastAPI form data support
 python-multipart
 
+# Twilio SMS/voice integration
+twilio
+
+# Authentication & Security
+python-jose
+passlib
+
 # NLLB-200 translation dependencies
 transformers
 sentencepiece
 torch
-
-# Twilio SMS/voice integration
-twilio
-
 
