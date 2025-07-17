@@ -18,21 +18,12 @@ async def create_feedback(
     db: Session = Depends(get_db)
 ):
     if feedback_text:
-        if language.lower() in ["en", "english", "eng"]:
-            # Skip translation for English
-            translated_text = feedback_text
-            analysis = analyze_feedback(text=feedback_text, rating=rating)
-            text_for_analysis = feedback_text
-        else:
-            # Translate non-English text
-            translated_text = translate_to_english(feedback_text, language)
-            analysis = analyze_feedback(text=translated_text, rating=rating)
-            text_for_analysis = translated_text
+        translated_text = feedback_text
+        analysis = analyze_feedback(text=translated_text, rating=rating)
         sentiment = analysis.get("sentiment")
         topic = analysis.get("topics") if analysis.get("sentiment") == "negative" else None
         urgency = "urgent" if analysis.get("urgent_flag") else "not urgent"
     else:
-        text_for_analysis = ""
         translated_text = ""
         analysis = analyze_feedback(rating=rating)
         sentiment = analysis.get("sentiment")
@@ -41,7 +32,7 @@ async def create_feedback(
     db_feedback = FeedbackModel(
         patient_id=patient_id,
         rating=rating,
-        feedback_text=text_for_analysis,
+        feedback_text=feedback_text,
         translated_text=translated_text,
         language=language,
         sentiment=sentiment,

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, Float, Text, TIMESTAMP, ForeignKey
+from sqlalchemy import Column, String, Integer, Text, TIMESTAMP, ForeignKey, ARRAY
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from app.db.database import Base
@@ -31,12 +31,10 @@ class Reminder(Base):
     __tablename__ = "reminders"
     reminder_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     patient_id = Column(UUID(as_uuid=True), ForeignKey("patients.patient_id"))
-    reminder_type = Column(String(50))
     message = Column(Text)
-    scheduled_time = Column(TIMESTAMP)
-    channel = Column(String(20))
+    scheduled_time = Column(ARRAY(TIMESTAMP))
+    days = Column(ARRAY(String(20)))
     status = Column(String(20))
-    attempts = Column(Integer)
     created_at = Column(TIMESTAMP)
 
 class ReminderDelivery(Base):
