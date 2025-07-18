@@ -1,5 +1,5 @@
 pydub
-whisper
+openai-whisper
 torch
 deep-translator
 
