@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
-from app.api import feedback, reminder, patient
+from app.api import feedback, reminder, patient, dashboard
 from app.db.database import Base, engine
 
 # Create tables
@@ -26,3 +26,4 @@ app.add_middleware(
 app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 app.include_router(reminder.router, prefix="/api", tags=["Reminder"])
 app.include_router(patient.router, prefix="/api", tags=["Patient"])
+app.include_router(dashboard.router, prefix="/api", tags=["Dashboard"])
