@@ -15,6 +15,7 @@ psycopg2-binary
 
 # Pydantic for schema validation
 pydantic
+pydantic[email]
 
 # Translation service
 textblob
