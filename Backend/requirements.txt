@@ -1,3 +1,7 @@
+pydub
+whisper
+torch
+deep-translator
 
 # FastAPI backend
 fastapi
