@@ -33,7 +33,6 @@ twilio
 python-jose
 passlib
 pyaudio
-portaudio
 sounddevice
 
 bcrypt
