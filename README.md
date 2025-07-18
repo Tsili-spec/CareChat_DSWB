@@ -24,8 +24,10 @@ For questions or feedback, create an Issue or contact the repository owner. Care
 
 
 # Patient Feedback Analysis Module
+
 https://github.com/user-attachments/assets/60eda92f-b8df-4f49-a94f-35e3a5d7f7f0
-https://github.com/user-attachments/assets/51398e84-94cb-4d8e-83cf-59683d373815
+
+https://github.com/user-attachments/assets/eeb84882-8b1e-44c0-8f6d-e9dd52f48cdd
 
 This branch contains the core logic for analyzing patient feedback using a combination of NLP (Natural Language Processing) and star ratings. 
 
