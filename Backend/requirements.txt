@@ -32,7 +32,7 @@ twilio
 # Authentication & Security
 python-jose
 passlib
-pyaudioop
+pyaudio
 
 bcrypt
 numpy
