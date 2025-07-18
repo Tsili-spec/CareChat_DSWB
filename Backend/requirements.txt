@@ -33,6 +33,7 @@ twilio
 python-jose
 passlib
 pyaudio
+portaudio
 
 bcrypt
 numpy
