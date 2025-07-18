@@ -34,5 +34,6 @@ python-jose
 passlib
 
 bcrypt
-
+numpy
+ffmpeg
 
