@@ -59,19 +59,6 @@ A comprehensive healthcare feedback system consisting of a Flutter mobile applic
 ├── ios/                         # iOS platform files
 └── assets/                      # Shared assets
 ```
-
-## 📱 Flutter Mobile Application
-
-### 🎥 Demo Videos
-
-#### Mobile App Demo
-https://github.com/user-attachments/assets/your-flutter-video-id
-
-#### Dashboard Demo  
-https://github.com/user-attachments/assets/your-dashboard-video-id
-
-*Note: Upload your videos to GitHub by dragging them into an issue or PR, then copy the generated URLs above*
-
 <!-- Alternative video embedding methods:
 
 #### Option 1: YouTube Embed (Click to play)
