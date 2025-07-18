@@ -1,8 +1,10 @@
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
+
 from app.core.logging_config import setup_logging, get_logger
-from app.api import feedback, reminder, patient
+from app.api import feedback, reminder, patient, dashboard
+
 from app.db.database import Base, engine
 import time
 import os
@@ -66,3 +68,4 @@ app.add_middleware(
 app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 app.include_router(reminder.router, prefix="/api", tags=["Reminder"])
 app.include_router(patient.router, prefix="/api", tags=["Patient"])
+app.include_router(dashboard.router, prefix="/api", tags=["Dashboard"])
