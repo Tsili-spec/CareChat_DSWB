@@ -31,6 +31,7 @@ class Reminder(Base):
     __tablename__ = "reminders"
     reminder_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     patient_id = Column(UUID(as_uuid=True), ForeignKey("patients.patient_id"))
+    title = Column(String(200))
     message = Column(Text)
     scheduled_time = Column(ARRAY(TIMESTAMP))
     days = Column(ARRAY(String(20)))
