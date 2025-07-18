@@ -1,0 +1,47 @@
+
+ pydub
+
+openai-whisper
+torch
+deep-translator
+
+# FastAPI backend
+fastapi
+uvicorn
+
+# Database
+sqlalchemy
+psycopg2-binary
+
+# Pydantic for schema validation
+pydantic
+pydantic[email]
+
+# Translation service
+textblob
+
+# Other utilities
+python-dotenv
+
+# Pydantic settings
+pydantic-settings
+
+# FastAPI form data support
+python-multipart
+
+# Twilio SMS/voice integration
+twilio
+
+# Authentication & Security
+python-jose
+passlib
+
+bcrypt
+
+# Database Migrations
+alembic
+
+numpy
+ffmpeg
+
+
