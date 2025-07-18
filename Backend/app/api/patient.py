@@ -9,7 +9,6 @@ from app.schemas.patient import (
     TokenResponse, RefreshTokenRequest
 )
 from app.services.patient_service import PatientService
-from app.core.auth import get_current_patient
 from uuid import UUID
 from typing import List
 
@@ -161,18 +160,23 @@ def create_patient(patient: PatientCreate, db: Session = Depends(get_db)):
 
 @router.get("/me", 
             response_model=Patient,
-            summary="Get current patient profile",
-            description="Get the profile of the currently authenticated patient")
-def get_my_profile(current_patient: PatientModel = Depends(get_current_patient)):
+            summary="Get patient profile by ID",
+            description="Get patient profile by providing patient ID in query parameter")
+def get_my_profile(
+    patient_id: UUID = Query(..., description="Patient ID to get profile for"),
+    db: Session = Depends(get_db)
+):
     """
-    Get the profile of the currently authenticated patient.
+    Get a patient profile by ID.
     
-    **Authentication Required:** Bearer token in Authorization header
+    **Query Parameters:**
+    - patient_id: UUID of the patient
+    
+    **Open Access:** No authentication required
     
     **Example:**
     ```
-    GET /api/me
-    Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+    GET /api/me?patient_id=123e4567-e89b-12d3-a456-426614174000
     ```
     
     **Returns:** Complete patient profile information
@@ -180,50 +184,36 @@ def get_my_profile(current_patient: PatientModel = Depends(get_current_patient))
     **Use Case:** Get patient info for displaying in mobile app profile screen
     
     **Errors:**
-    - 401: Invalid or expired access token
+    - 404: Patient not found
     """
-    return current_patient
+    patient = db.query(PatientModel).filter(PatientModel.patient_id == patient_id).first()
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    return patient
 
 @router.get("/patient/{patient_id}", 
             response_model=Patient,
-            summary="Get patient by ID (Admin)",
-            description="Get a specific patient by their ID - Admin only")
-def read_patient(
-    patient_id: UUID, 
-    db: Session = Depends(get_db),
-    current_patient: PatientModel = Depends(get_current_patient)
-):
+            summary="Get patient by ID",
+            description="Get a specific patient by their ID - Open access")
+def read_patient(patient_id: UUID, db: Session = Depends(get_db)):
     """
     Get a specific patient by their ID.
     
     **Path Parameters:**
     - patient_id: UUID of the patient
     
-    **Authentication Required:** Bearer token
-    
-    **Authorization:** 
-    - Patients can only access their own profile
-    - Admin users can access any patient profile
+    **Open Access:** No authentication required
     
     **Example:**
     ```
     GET /api/patient/123e4567-e89b-12d3-a456-426614174000
-    Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     ```
     
+    **Returns:** Complete patient profile information
+    
     **Errors:**
-    - 401: Invalid or expired access token
-    - 403: Not authorized to access this patient
     - 404: Patient not found
     """
-    # Allow patients to access their own profile, or implement admin check
-    if str(current_patient.patient_id) != str(patient_id):
-        # In future: check if current_patient is admin
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to access this patient profile"
-        )
-    
     patient = db.query(PatientModel).filter(PatientModel.patient_id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -231,23 +221,21 @@ def read_patient(
 
 @router.get("/patient/", 
             response_model=List[Patient],
-            summary="List all patients (Admin only)",
-            description="Get a list of all patients - Admin only endpoint")
+            summary="List all patients",
+            description="Get a list of all patients - Open access")
 def list_patients(
     limit: int = Query(100, description="Maximum number of patients to return", ge=1, le=1000),
     offset: int = Query(0, description="Number of patients to skip", ge=0),
-    db: Session = Depends(get_db),
-    current_patient: PatientModel = Depends(get_current_patient)
+    db: Session = Depends(get_db)
 ):
     """
-    Get a list of all patients (Admin only).
+    Get a list of all patients.
     
     **Query Parameters:**
     - limit: Maximum number of patients to return (1-1000, default: 100)
     - offset: Number of patients to skip for pagination (default: 0)
     
-    **Authentication Required:** Bearer token
-    **Authorization:** Admin only (not implemented yet)
+    **Open Access:** No authentication required
     
     **Examples:**
     ```
@@ -255,48 +243,34 @@ def list_patients(
     GET /api/patient/?limit=50&offset=100 # Get patients 101-150
     ```
     
-    **Note:** This endpoint should be restricted to admin users in production.
-    
-    **Errors:**
-    - 401: Invalid or expired access token
-    - 403: Not authorized (non-admin users)
+    **Returns:** List of all patients with pagination support
     """
-    # TODO: Implement admin role check
-    # For now, this is open to all authenticated users
     return db.query(PatientModel).offset(offset).limit(limit).all()
 
 @router.delete("/patient/{patient_id}",
-               summary="Delete patient account (Admin)",
-               description="Permanently delete a patient account - Admin only")
-def delete_patient(
-    patient_id: UUID, 
-    db: Session = Depends(get_db),
-    current_patient: PatientModel = Depends(get_current_patient)
-):
+               summary="Delete patient account",
+               description="Permanently delete a patient account - Open access")
+def delete_patient(patient_id: UUID, db: Session = Depends(get_db)):
     """
     Permanently delete a patient account.
     
     **Path Parameters:**
     - patient_id: UUID of the patient to delete
     
-    **Authentication Required:** Bearer token
-    **Authorization:** Admin only or own account
+    **Open Access:** No authentication required
     
     **⚠️ Warning:** This action is permanent and cannot be undone.
     
+    **Example:**
+    ```
+    DELETE /api/patient/123e4567-e89b-12d3-a456-426614174000
+    ```
+    
+    **Returns:** Success confirmation message
+    
     **Errors:**
-    - 401: Invalid or expired access token
-    - 403: Not authorized to delete this patient
     - 404: Patient not found
     """
-    # Allow patients to delete their own account, or admin to delete any
-    if str(current_patient.patient_id) != str(patient_id):
-        # TODO: check if current_patient is admin
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Not authorized to delete this patient account"
-        )
-    
     patient = db.query(PatientModel).filter(PatientModel.patient_id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
