@@ -32,8 +32,6 @@ twilio
 # Authentication & Security
 python-jose
 passlib
-pyaudio
-sounddevice
 
 bcrypt
 numpy
