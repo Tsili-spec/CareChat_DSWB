@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  # FastAPI Backend Service (Production)
+  backend:
+    build: 
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: carechat_backend_prod
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://carechat_user:${DB_PASSWORD}@db:5432/carechat_db
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_REFRESH_SECRET_KEY=${JWT_REFRESH_SECRET_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - carechat_network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # PostgreSQL Database Service (Production)
+  db:
+    image: postgres:15-alpine
+    container_name: carechat_db_prod
+    environment:
+      - POSTGRES_DB=carechat_db
+      - POSTGRES_USER=carechat_user
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./backups:/backups  # For database backups
+    networks:
+      - carechat_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U carechat_user -d carechat_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  # Nginx Reverse Proxy (Optional for production)
+  nginx:
+    image: nginx:alpine
+    container_name: carechat_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl  # SSL certificates
+    depends_on:
+      - backend
+    networks:
+      - carechat_network
+    restart: unless-stopped
+    profiles:
+      - nginx
+
+  # Redis for caching (Optional)
+  redis:
+    image: redis:7-alpine
+    container_name: carechat_redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - carechat_network
+    restart: unless-stopped
+    profiles:
+      - cache
+
+volumes:
+  postgres_data_prod:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  carechat_network:
+    driver: bridge 
