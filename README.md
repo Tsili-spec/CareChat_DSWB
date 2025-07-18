@@ -2,6 +2,8 @@
 # Patient Feedback Analysis Module
 https://github.com/user-attachments/assets/b07fd0c2-e897-4663-a885-59509fb9f497
 
+https://github.com/user-attachments/assets/51398e84-94cb-4d8e-83cf-59683d373815
+
 This branch contains the core logic for analyzing patient feedback using a combination of NLP (Natural Language Processing) and star ratings. 
 
 🔍 What This Module Does
