@@ -1,4 +1,6 @@
+
  pydub
+
 openai-whisper
 torch
 deep-translator
