@@ -110,3 +110,30 @@
 2025-07-18 10:27:27 - INFO - app.main - main.log_requests:38 - Request Body: {'patient_id': 'e2625f6b-81ff-4450-981b-394ac39c497a', 'title': 'Take Morning Medication', 'message': 'Please take your blood pressure medication with breakfast and a full glass of water', 'scheduled_time': ['2024-01-15T08:00:00Z', '2024-01-16T08:00:00Z'], 'days': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], 'status': 'active'}
 2025-07-18 10:27:28 - INFO - app.main - main.log_requests:47 - Response Status: 400
 2025-07-18 10:27:28 - INFO - app.main - main.log_requests:48 - Response Time: 756.74ms
+2025-07-18 10:29:14 - INFO - root - logging_config.setup_logging:46 - Logging configured successfully.
+2025-07-18 10:29:14 - INFO - app.main - main.<module>:19 - Creating database tables...
+2025-07-18 10:29:20 - INFO - app.main - main.<module>:21 - Database tables created.
+2025-07-18 10:30:20 - INFO - app.main - main.log_requests:35 - Request: POST http://localhost:8000/api/reminder/
+2025-07-18 10:30:20 - INFO - app.main - main.log_requests:38 - Request Body: {'patient_id': 'e2625f6b-81ff-4450-981b-394ac39c497a', 'title': 'Take Morning Medication', 'message': 'Please take your blood pressure medication with breakfast and a full glass of water', 'scheduled_time': ['2024-01-15T08:00:00Z', '2024-01-16T08:00:00Z'], 'days': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], 'status': 'active'}
+2025-07-18 10:30:21 - INFO - app.main - main.log_requests:47 - Response Status: 400
+2025-07-18 10:30:21 - INFO - app.main - main.log_requests:48 - Response Time: 1134.81ms
+2025-07-18 10:34:11 - INFO - app.main - main.log_requests:35 - Request: POST http://localhost:8000/api/reminder/
+2025-07-18 10:34:11 - INFO - app.main - main.log_requests:38 - Request Body: {'patient_id': 'e2625f6b-81ff-4450-981b-394ac39c497a', 'title': 'Take Morning Medication', 'message': 'Please take your blood pressure medication with breakfast and a full glass of water', 'scheduled_time': ['2024-01-15T08:00:00Z', '2024-01-16T08:00:00Z'], 'days': ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], 'status': 'active'}
+2025-07-18 10:34:13 - INFO - app.main - main.log_requests:47 - Response Status: 200
+2025-07-18 10:34:13 - INFO - app.main - main.log_requests:48 - Response Time: 1831.72ms
+2025-07-18 10:34:35 - INFO - app.main - main.log_requests:35 - Request: GET http://localhost:8000/api/reminder/patient/e2625f6b-81ff-4450-981b-394ac39c497a
+2025-07-18 10:34:35 - INFO - app.main - main.log_requests:40 - Request Body: (No JSON body or unable to parse)
+2025-07-18 10:34:36 - INFO - app.main - main.log_requests:47 - Response Status: 200
+2025-07-18 10:34:36 - INFO - app.main - main.log_requests:48 - Response Time: 795.56ms
+2025-07-18 10:35:29 - INFO - app.main - main.log_requests:35 - Request: POST http://localhost:8000/api/reminder/
+2025-07-18 10:35:29 - INFO - app.main - main.log_requests:40 - Request Body: (No JSON body or unable to parse)
+2025-07-18 10:35:29 - INFO - app.main - main.log_requests:47 - Response Status: 422
+2025-07-18 10:35:29 - INFO - app.main - main.log_requests:48 - Response Time: 2.00ms
+2025-07-18 10:35:52 - INFO - app.main - main.log_requests:35 - Request: POST http://localhost:8000/api/reminder/
+2025-07-18 10:35:52 - INFO - app.main - main.log_requests:40 - Request Body: (No JSON body or unable to parse)
+2025-07-18 10:35:52 - INFO - app.main - main.log_requests:47 - Response Status: 422
+2025-07-18 10:35:52 - INFO - app.main - main.log_requests:48 - Response Time: 1.95ms
+2025-07-18 10:49:43 - INFO - app.main - main.log_requests:35 - Request: GET http://localhost:8000/api/reminder/patient/e2625f6b-81ff-4450-981b-394ac39c497a
+2025-07-18 10:49:43 - INFO - app.main - main.log_requests:40 - Request Body: (No JSON body or unable to parse)
+2025-07-18 10:49:44 - INFO - app.main - main.log_requests:47 - Response Status: 200
+2025-07-18 10:49:44 - INFO - app.main - main.log_requests:48 - Response Time: 861.02ms
