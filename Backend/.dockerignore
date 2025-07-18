@@ -56,7 +56,7 @@ alembic/versions/*.py
 *.sqlite3
 
 # Logs
-logs/
+/logs/
 *.log
 
 # Test files

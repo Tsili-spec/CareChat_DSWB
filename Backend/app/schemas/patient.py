@@ -11,13 +11,13 @@ class PatientBase(BaseModel):
         examples=["John"]
     )
     last_name: str = Field(
-        min_length=1,
+        min_length=0,
         max_length=100,
         description="Patient's last name",
         examples=["Doe"]
     )
     phone_number: str = Field(
-        min_length=10,
+        min_length=8,
         max_length=20,
         description="Patient's phone number (required for login)",
         examples=["+237123456789"]

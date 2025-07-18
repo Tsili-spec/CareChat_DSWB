@@ -31,4 +31,7 @@ passlib
 
 bcrypt
 
+# Database Migrations
+alembic
+
 

@@ -10,7 +10,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://carechat_user:carechat_password@db:5432/carechat_db
+      - DATABASE_URL=postgresql://feedback_reminder_database_9h4d_user:peNEi6symiAQ5TUpjqAI5t2PfGQvp3MJ@dpg-d1sibmbe5dus73b2k67g-a.oregon-postgres.render.com/feedback_reminder_database_9h4d
       - JWT_SECRET_KEY=your_super_secret_jwt_key_here_change_in_production
       - JWT_REFRESH_SECRET_KEY=your_super_secret_refresh_key_here_change_in_production
       - CORS_ORIGINS=["*"]

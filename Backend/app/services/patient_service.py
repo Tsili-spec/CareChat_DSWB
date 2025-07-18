@@ -8,6 +8,9 @@ from fastapi import HTTPException, status
 from uuid import UUID
 from typing import Optional
 import os
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 # Configuration
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -59,6 +62,8 @@ class PatientService:
         """
         Create a new patient account
         """
+        logger.info(f"Attempting to create patient with phone: {patient_data.phone_number}")
+        
         # Check if patient already exists
         existing_patient = db.query(PatientModel).filter(
             (PatientModel.phone_number == patient_data.phone_number) | 
@@ -67,11 +72,13 @@ class PatientService:
         
         if existing_patient:
             if existing_patient.phone_number == patient_data.phone_number:
+                logger.warning(f"Patient creation failed: phone number {patient_data.phone_number} already exists.")
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="A patient with this phone number already exists"
                 )
             else:
+                logger.warning(f"Patient creation failed: email {patient_data.email} already exists.")
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="A patient with this email already exists"
@@ -94,6 +101,8 @@ class PatientService:
         db.add(db_patient)
         db.commit()
         db.refresh(db_patient)
+        
+        logger.info(f"Patient created successfully with ID: {db_patient.patient_id}")
         return db_patient
     
     @staticmethod
@@ -101,16 +110,21 @@ class PatientService:
         """
         Authenticate a patient using phone number and password
         """
+        logger.info(f"Authentication attempt for phone: {login_data.phone_number}")
+        
         patient = db.query(PatientModel).filter(
             PatientModel.phone_number == login_data.phone_number
         ).first()
         
         if not patient:
+            logger.warning(f"Authentication failed for phone {login_data.phone_number}: patient not found.")
             return None
         
         if not PatientService.verify_password(login_data.password, patient.password_hash):
+            logger.warning(f"Authentication failed for patient {patient.patient_id}: invalid password.")
             return None
         
+        logger.info(f"Patient {patient.patient_id} authenticated successfully.")
         return patient
     
     @staticmethod

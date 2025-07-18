@@ -27,6 +27,10 @@ RUN pip install --no-cache-dir --upgrade pip \
 # Copy application code
 COPY . .
 
+# Create log directory and set permissions
+RUN mkdir -p /app/logs \
+    && chown -R appuser:appuser /app/logs
+
 # Create non-root user for security
 RUN adduser --disabled-password --gecos '' --uid 1000 appuser \
     && chown -R appuser:appuser /app
