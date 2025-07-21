@@ -6,8 +6,7 @@ from app.db.database import Base
 class Patient(Base):
     __tablename__ = "patients"
     patient_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    first_name = Column(String(100))
-    last_name = Column(String(100))
+    full_name = Column(String(200))
     phone_number = Column(String(20))
     email = Column(String(255))
     preferred_language = Column(String(10))
