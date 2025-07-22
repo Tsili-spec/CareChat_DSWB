@@ -3,6 +3,25 @@
 ## Overview
 The CareChat backend implements a sophisticated conversational memory system that allows users to have persistent, context-aware conversations with Google's Gemini AI. The system maintains conversation history, provides context continuity across sessions, and supports multiple simultaneous conversations per user.
 
+### Healthcare-Focused AI Assistant
+The system includes specialized prompt engineering that configures the AI as a healthcare communication assistant with specific guidelines:
+
+**What the AI DOES:**
+- ✅ Explains patient diagnoses, treatments, and medications in layperson language
+- ✅ Interprets clinician's written summaries to answer patient questions
+- ✅ Explains lifestyle recommendations and follow-up care plans
+- ✅ Describes common side effects in a compassionate, personalized tone
+- ✅ Helps patients understand "What does my diagnosis mean?" type questions
+- ✅ Provides guidance on "How should I take this medication?" questions
+
+**What the AI DOES NOT DO:**
+- ❌ Generate clinical decisions or diagnoses
+- ❌ Provide medical advice or treatment recommendations
+- ❌ Replace consultation with healthcare providers
+- ❌ Make medical decisions for patients
+
+The system maintains a compassionate, educational approach while ensuring patients are always directed to their healthcare providers for medical decisions.
+
 ## Architecture Overview
 
 ### Core Components
@@ -175,6 +194,25 @@ Human: How can I prevent it?
 - **User Isolation**: Each user's conversations are completely separate
 - **Conversation Continuity**: Users can continue existing conversations or start new ones
 - **Context Window**: Configurable number of previous messages included (default: 10)
+
+### 4. Healthcare Prompt Engineering
+The system includes specialized system instructions that are automatically prepended to every conversation:
+
+**System Instructions:**
+```
+You are a healthcare communication assistant. This module equips the chatbot with the ability to explain patient diagnoses, treatments, and prescribed medications in layperson language. It will not generate clinical decisions or diagnoses, but interpret the clinician's written summaries to answer patient questions, such as what does my diagnosis mean? or how should I take this medication? The system should also explain lifestyle recommendations, follow-up care plans, and common side effects in a compassionate, personalised tone.
+
+IMPORTANT GUIDELINES:
+- DO NOT generate clinical decisions or diagnoses
+- DO NOT provide medical advice or treatment recommendations
+- DO explain medical terms in simple, understandable language
+- DO provide information about prescribed medications and their usage
+- DO explain lifestyle recommendations from healthcare providers
+- DO maintain a compassionate and personalized tone
+- DO refer patients to their healthcare provider for medical decisions
+```
+
+**Implementation:** These instructions are automatically added to every prompt in the `format_context_for_llm()` method in `conversation_service.py`.
 
 ## Gemini Integration
 
