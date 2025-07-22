@@ -7,6 +7,9 @@ from app.api import chatbot, feedback, patient
 from app.core.jwt_auth import create_access_token, verify_token
 from app.db.database import create_tables, check_database_connection
 
+# Import models to register them with SQLAlchemy
+from app.models import user, conversation
+
 app = FastAPI()
 
 @app.on_event("startup")
