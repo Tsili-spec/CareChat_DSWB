@@ -31,7 +31,7 @@ class ChatMessage(Base):
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     
     # Optional metadata
-    model_used = Column(String(50), nullable=True)  # e.g., 'gemini-2.0-flash'
+    model_used = Column(String(50), nullable=True)  # e.g., 'gemini-2.5-pro'
     token_count = Column(Integer, nullable=True)
     
     # Foreign key relationship

@@ -177,3 +177,49 @@ async def get_patient_by_id(patient_id: UUID, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
+
+@router.delete("/patients/{patient_id}")
+async def delete_patient(patient_id: UUID, db: Session = Depends(get_db)):
+    """
+    Delete a patient and all associated data (conversations, messages)
+    
+    **How it works:**
+    1. Verifies the patient exists in the database
+    2. Deletes all messages from the patient's conversations
+    3. Deletes all conversations belonging to the patient  
+    4. Deletes the patient record itself
+    5. Returns a summary of deleted data
+    
+    **Security Note:** This permanently deletes all patient data and cannot be undone.
+    Use with caution and ensure proper authorization in production.
+    """
+    try:
+        from app.services.conversation_service import conversation_memory
+        
+        # Check if patient exists
+        patient = db.query(User).filter(User.patient_id == patient_id).first()
+        if not patient:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Patient not found"
+            )
+        
+        # Delete all patient data using conversation service
+        deletion_result = conversation_memory.delete_user_data(db=db, user_id=patient_id)
+        
+        logger.info(f"Deleted patient {patient_id} and all associated data")
+        
+        return {
+            "status": "success",
+            "patient_id": str(patient_id),
+            **deletion_result
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting patient {patient_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete patient: {str(e)}"
+        )

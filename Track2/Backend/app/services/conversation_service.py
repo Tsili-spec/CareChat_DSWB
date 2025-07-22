@@ -14,7 +14,7 @@ from app.models.user import User
 logger = logging.getLogger(__name__)
 
 class ConversationMemoryService:
-    def __init__(self, max_context_messages: int = 10):
+    def __init__(self, max_context_messages: int = 5):  # Reduced from 10 to 5
         """
         Initialize the conversation memory service
         
@@ -114,6 +114,7 @@ class ConversationMemoryService:
     def format_context_for_llm(self, messages: List[ChatMessage]) -> str:
         """
         Format conversation history for LLM context with healthcare system instructions
+        Uses smart truncation and summarization for longer conversations
         
         Args:
             messages: List of ChatMessage objects
@@ -121,26 +122,72 @@ class ConversationMemoryService:
         Returns:
             Formatted context string with system instructions
         """
-        # Healthcare-specific system instructions
-        system_instructions = """You are a healthcare communication assistant. This module equips the chatbot with the ability to explain patient diagnoses, treatments, and prescribed medications in layperson language. It will not generate clinical decisions or diagnoses, but interpret the clinician's written summaries to answer patient questions, such as what does my diagnosis mean? or how should I take this medication? The system should also explain lifestyle recommendations, follow-up care plans, and common side effects in a compassionate, personalised tone.
+        # Shortened healthcare system instructions for longer conversations
+        if len(messages) > 3:
+            system_instructions = """You are a healthcare professional assistant. Explain medical information in simple, compassionate terms.
+- Interpret clinician summaries in layperson language
+- Include disclaimer: "Please refer to your healthcare provider for medical decisions"
+- Keep responses under 150 words, be concise
+- Use bullet points when helpful"""
+        else:
+            # Full instructions for shorter conversations
+            system_instructions = """You are a **healthcare professional assistant** whose role is to **explain medical information** in simple, compassionate terms.
 
-IMPORTANT GUIDELINES:
-- DO NOT generate clinical decisions or diagnoses
-- DO NOT provide medical advice or treatment recommendations
-- DO explain medical terms in simple, understandable language
-- DO provide information about prescribed medications and their usage
-- DO explain lifestyle recommendations from healthcare providers
-- DO maintain a compassionate and personalized tone
-- DO refer patients to their healthcare provider for medical decisions"""
+**Your responsibilities:**
+- Interpret clinicians' summaries of diagnoses, treatments, medications.
+- Explain them in layperson-friendly language.
+- Clarify common side effects, follow-up care, and lifestyle advice empathetically.
+- Always **include a disclaimer**: "Please refer to your healthcare provider for medical decisions."
+
+**IMPORTANT - Don't Do:**
+- Don't generate new clinical diagnoses or treatment plans.
+- Don't provide medical advice beyond interpreting clinician input.
+
+**Response Guidelines:**
+- Keep responses under 150 words maximum.
+- Be straight to the point and concise.
+- Use short, clear bullet points when helpful.
+- If you're uncertain, say: "I'm not sure—please check with your provider."
+- Keep a warm, respectful tone.
+"""
         
         if not messages:
             return system_instructions + "\n\nCurrent message:"
         
-        context_lines = [system_instructions, "\nPrevious conversation context:"]
-        
-        for message in messages:
-            role = "Human" if message.role == "user" else "Assistant"
-            context_lines.append(f"{role}: {message.content}")
+        # Smart context summarization for longer conversations
+        if len(messages) > 3:
+            # Summarize older messages, keep recent ones in full
+            recent_messages = messages[-2:]  # Last 2 messages in full
+            older_messages = messages[:-2]   # Older messages to summarize
+            
+            context_lines = [system_instructions, "\nPrevious conversation summary:"]
+            
+            # Add summarized older context
+            if older_messages:
+                topics = []
+                for msg in older_messages:
+                    if msg.role == "user":
+                        # Extract key topics from user messages (first 50 chars)
+                        topic = msg.content[:50].strip()
+                        if len(msg.content) > 50:
+                            topic += "..."
+                        topics.append(f"User asked about: {topic}")
+                
+                context_lines.append("Earlier topics: " + "; ".join(topics[-2:]))  # Last 2 topics
+            
+            # Add recent messages in full
+            context_lines.append("\nRecent messages:")
+            for message in recent_messages:
+                role = "Human" if message.role == "user" else "Assistant"
+                # Truncate long messages in context
+                content = message.content[:200] + "..." if len(message.content) > 200 else message.content
+                context_lines.append(f"{role}: {content}")
+        else:
+            # Short conversations - include all messages
+            context_lines = [system_instructions, "\nPrevious conversation context:"]
+            for message in messages:
+                role = "Human" if message.role == "user" else "Assistant"
+                context_lines.append(f"{role}: {message.content}")
         
         context_lines.append("\nCurrent message:")
         return "\n".join(context_lines)
@@ -232,6 +279,160 @@ IMPORTANT GUIDELINES:
         ).count()
         
         return count
+    
+    def delete_user_data(self, db: Session, user_id: UUID) -> dict:
+        """
+        Delete all user data including conversations and messages
+        
+        Args:
+            db: Database session
+            user_id: Patient ID to delete
+            
+        Returns:
+            Dictionary with deletion summary
+        """
+        try:
+            # Get user's conversations first for count
+            conversations = db.query(Conversation).filter(
+                Conversation.patient_id == user_id
+            ).all()
+            
+            conversation_count = len(conversations)
+            message_count = 0
+            
+            # Delete all messages in user's conversations
+            for conv in conversations:
+                messages = db.query(ChatMessage).filter(
+                    ChatMessage.conversation_id == conv.conversation_id
+                ).all()
+                message_count += len(messages)
+                
+                # Delete messages
+                for message in messages:
+                    db.delete(message)
+            
+            # Delete conversations
+            db.query(Conversation).filter(
+                Conversation.patient_id == user_id
+            ).delete()
+            
+            # Delete user
+            from app.models.user import User
+            user = db.query(User).filter(User.patient_id == user_id).first()
+            if user:
+                db.delete(user)
+            
+            db.commit()
+            
+            return {
+                "user_deleted": True,
+                "conversations_deleted": conversation_count,
+                "messages_deleted": message_count,
+                "message": f"Successfully deleted user {user_id} and all associated data"
+            }
+            
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Error deleting user {user_id}: {str(e)}")
+            raise
+    
+    def delete_conversation(self, db: Session, conversation_id: UUID, user_id: UUID) -> dict:
+        """
+        Delete a specific conversation and all its messages
+        
+        Args:
+            db: Database session
+            conversation_id: Conversation ID to delete
+            user_id: Patient ID (for ownership verification)
+            
+        Returns:
+            Dictionary with deletion summary
+        """
+        try:
+            # Verify conversation exists and belongs to user
+            conversation = db.query(Conversation).filter(
+                Conversation.conversation_id == conversation_id,
+                Conversation.patient_id == user_id
+            ).first()
+            
+            if not conversation:
+                return {
+                    "conversation_deleted": False,
+                    "messages_deleted": 0,
+                    "error": "Conversation not found or access denied"
+                }
+            
+            # Count and delete messages
+            messages = db.query(ChatMessage).filter(
+                ChatMessage.conversation_id == conversation_id
+            ).all()
+            
+            message_count = len(messages)
+            
+            for message in messages:
+                db.delete(message)
+            
+            # Delete conversation
+            db.delete(conversation)
+            db.commit()
+            
+            return {
+                "conversation_deleted": True,
+                "messages_deleted": message_count,
+                "message": f"Successfully deleted conversation {conversation_id} with {message_count} messages"
+            }
+            
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Error deleting conversation {conversation_id}: {str(e)}")
+            raise
+    
+    def delete_message(self, db: Session, message_id: UUID, user_id: UUID) -> dict:
+        """
+        Delete a specific message from a conversation
+        
+        Args:
+            db: Database session
+            message_id: Message ID to delete
+            user_id: Patient ID (for ownership verification)
+            
+        Returns:
+            Dictionary with deletion summary
+        """
+        try:
+            # Find message and verify ownership through conversation
+            message = db.query(ChatMessage).join(
+                Conversation, ChatMessage.conversation_id == Conversation.conversation_id
+            ).filter(
+                ChatMessage.message_id == message_id,
+                Conversation.patient_id == user_id
+            ).first()
+            
+            if not message:
+                return {
+                    "message_deleted": False,
+                    "error": "Message not found or access denied"
+                }
+            
+            conversation_id = message.conversation_id
+            db.delete(message)
+            
+            # Update conversation timestamp
+            conversation = db.query(Conversation).filter(
+                Conversation.conversation_id == conversation_id
+            ).first()
+            if conversation:
+                db.commit()  # This triggers updated_at
+            
+            return {
+                "message_deleted": True,
+                "message": f"Successfully deleted message {message_id}"
+            }
+            
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Error deleting message {message_id}: {str(e)}")
+            raise
 
 # Global instance
 conversation_memory = ConversationMemoryService()

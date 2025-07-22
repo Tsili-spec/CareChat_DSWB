@@ -19,6 +19,8 @@ async def chat_with_memory(request: ChatMessageCreate, db: Session = Depends(get
     Send a message to Gemini AI with conversational memory.
     
     Uses conversation history to maintain context across multiple messages.
+    If this is the first message you are sending then set the conversation_id to null.
+    conversation_id: null
     """
     try:
         logger.info(f"Chat request from user {request.user_id} with message length: {len(request.message)}")
@@ -62,8 +64,11 @@ async def chat_with_memory(request: ChatMessageCreate, db: Session = Depends(get
                 title=title
             )
         
-        # Get response from Gemini
-        response_text = await gemini_service.generate_response(full_prompt)
+        # Get response from Gemini with healthcare guidelines
+        response_text = await gemini_service.generate_response(
+            full_prompt,
+            temperature=0.3
+        )
         
         # Add assistant message to conversation
         assistant_message = conversation_memory.add_message(
@@ -175,4 +180,106 @@ async def get_conversation_history(user_id: str, conversation_id: str, db: Sessi
         raise
     except Exception as e:
         logger.error(f"Error fetching conversation history: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/conversations/{user_id}/{conversation_id}")
+async def delete_conversation(user_id: str, conversation_id: str, db: Session = Depends(get_db)):
+    """
+    Delete a specific conversation and all its messages
+    
+    **How it works:**
+    1. Validates the user_id and conversation_id formats
+    2. Verifies the conversation exists and belongs to the specified user
+    3. Deletes all messages within the conversation
+    4. Deletes the conversation record itself
+    5. Returns a summary of what was deleted
+    
+    **Security:** Only the conversation owner can delete their conversations.
+    Attempting to delete another user's conversation will result in a 404 error.
+    """
+    try:
+        from uuid import UUID
+        user_uuid = UUID(user_id)
+        conv_uuid = UUID(conversation_id)
+        
+        # Delete conversation using conversation service
+        deletion_result = conversation_memory.delete_conversation(
+            db=db, 
+            conversation_id=conv_uuid, 
+            user_id=user_uuid
+        )
+        
+        if not deletion_result.get("conversation_deleted"):
+            raise HTTPException(
+                status_code=404, 
+                detail=deletion_result.get("error", "Conversation not found")
+            )
+        
+        logger.info(f"Deleted conversation {conversation_id} for user {user_id}")
+        
+        return {
+            "status": "success",
+            "user_id": user_id,
+            "conversation_id": conversation_id,
+            **deletion_result
+        }
+        
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid ID format")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting conversation: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/messages/{user_id}/{message_id}")
+async def delete_message(user_id: str, message_id: str, db: Session = Depends(get_db)):
+    """
+    Delete a specific message from a conversation
+    
+    **How it works:**
+    1. Validates the user_id and message_id formats
+    2. Finds the message and verifies it belongs to the user's conversation
+    3. Deletes the message from the database
+    4. Updates the conversation's last modified timestamp
+    5. Returns confirmation of deletion
+    
+    **Security:** Only messages from the user's own conversations can be deleted.
+    The system verifies ownership through the conversation relationship.
+    
+    **Note:** Deleting messages may affect conversation context for future AI responses.
+    """
+    try:
+        from uuid import UUID
+        user_uuid = UUID(user_id)
+        msg_uuid = UUID(message_id)
+        
+        # Delete message using conversation service
+        deletion_result = conversation_memory.delete_message(
+            db=db,
+            message_id=msg_uuid,
+            user_id=user_uuid
+        )
+        
+        if not deletion_result.get("message_deleted"):
+            raise HTTPException(
+                status_code=404,
+                detail=deletion_result.get("error", "Message not found")
+            )
+        
+        logger.info(f"Deleted message {message_id} for user {user_id}")
+        
+        return {
+            "status": "success",
+            "user_id": user_id,
+            "message_id": message_id,
+            **deletion_result
+        }
+        
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid ID format")
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting message: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
