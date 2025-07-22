@@ -5,13 +5,13 @@ from app.db.database import get_db
 from app.models.user import User
 from app.schemas.user import (
     UserSignup, UserLogin, UserResponse, LoginResponse, 
-    TokenRefresh, TokenResponse, UserCreate, UserOut
+    TokenRefresh, TokenResponse
 )
 from app.core.jwt_auth import create_access_token, create_refresh_token, verify_token, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.core.auth import get_current_patient
 from passlib.context import CryptContext
 from datetime import timedelta
-from typing import Optional
+from typing import List
+from uuid import UUID
 import logging
 
 router = APIRouter()
@@ -125,84 +125,55 @@ async def login(login_data: UserLogin, db: Session = Depends(get_db)):
             detail="Internal server error"
         )
 
-@router.post("/refresh", response_model=TokenResponse)
-async def refresh_token(token_data: TokenRefresh, db: Session = Depends(get_db)):
-    """Generate new access token using refresh token"""
+@router.get("/patients", response_model=List[UserResponse])
+async def get_all_patients(db: Session = Depends(get_db)):
+    """Get all patients in the system - No authorization required"""
     try:
-        # Verify refresh token
-        payload = verify_token(token_data.refresh_token, "refresh")
-        if payload is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token"
+        patients = db.query(User).all()
+        
+        return [
+            UserResponse(
+                patient_id=patient.patient_id,
+                full_name=patient.full_name,
+                phone_number=patient.phone_number,
+                email=patient.email,
+                preferred_language=patient.preferred_language
             )
+            for patient in patients
+        ]
         
-        patient_id = payload.get("sub")
-        if patient_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid refresh token"
-            )
-        
-        # Verify patient still exists
-        db_user = db.query(User).filter(User.patient_id == patient_id).first()
-        if not db_user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Patient not found"
-            )
-        
-        # Generate new access token
-        new_access_token = create_access_token(
-            data={"sub": patient_id},
-            expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        )
-        
-        logger.info(f"Token refreshed for patient: {patient_id}")
-        
-        return TokenResponse(
-            access_token=new_access_token,
-            token_type="bearer",
-            expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
-        )
-        
-    except HTTPException:
-        raise
     except Exception as e:
-        logger.error(f"Token refresh error: {str(e)}")
+        logger.error(f"Error fetching patients: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
 
-@router.get("/me", response_model=UserResponse)
-async def get_current_user_profile(current_patient: User = Depends(get_current_patient)):
-    """Get current authenticated patient profile"""
-    return UserResponse(
-        patient_id=current_patient.patient_id,
-        full_name=current_patient.full_name,
-        phone_number=current_patient.phone_number,
-        email=current_patient.email,
-        preferred_language=current_patient.preferred_language
-    )
-
-# Legacy endpoints for backward compatibility
-@router.post("/register", response_model=UserOut)
-def register(user: UserCreate, db: Session = Depends(get_db)):
-    """Legacy registration endpoint"""
-    hashed_password = pwd_context.hash(user.password)
-    db_user = User(
-        full_name=user.name,
-        email=user.email,
-        phone_number=user.phone_number,
-        password_hash=hashed_password
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return UserOut(
-        id=int(str(db_user.patient_id).replace('-', '')[:8], 16),  # Convert UUID to int for legacy
-        name=db_user.full_name,
-        email=db_user.email,
-        phone_number=db_user.phone_number
-    )
+@router.get("/patients/{patient_id}", response_model=UserResponse)
+async def get_patient_by_id(patient_id: UUID, db: Session = Depends(get_db)):
+    """Get a specific patient by their patient_id - No authorization required"""
+    try:
+        patient = db.query(User).filter(User.patient_id == patient_id).first()
+        
+        if not patient:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Patient not found"
+            )
+        
+        return UserResponse(
+            patient_id=patient.patient_id,
+            full_name=patient.full_name,
+            phone_number=patient.phone_number,
+            email=patient.email,
+            preferred_language=patient.preferred_language
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error fetching patient {patient_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
+        )
