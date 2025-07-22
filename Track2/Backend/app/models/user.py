@@ -1,5 +1,6 @@
 # User metadata (for analytics/eval)
 from sqlalchemy import Column, String, Integer
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 from sqlalchemy.dialects.postgresql import UUID
@@ -15,3 +16,6 @@ class User(Base):
     preferred_language = Column(String(10), default="en")
     created_at = Column(TIMESTAMP, server_default=func.now())
     password_hash = Column(String(255))
+    
+    # Note: Relationships removed to avoid circular imports
+    # Use explicit queries to get conversations for a user

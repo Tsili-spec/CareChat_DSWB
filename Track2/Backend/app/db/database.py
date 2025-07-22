@@ -7,26 +7,23 @@ import os
 
 Base = declarative_base()
 
-# Handle different database types and SSL configuration
-database_url = DATABASE_URL or "sqlite:///./carechat.db"
+# PostgreSQL database configuration
+if not DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is required")
 
-if database_url.startswith("postgresql"):
-    # PostgreSQL with SSL configuration
-    engine = create_engine(
-        database_url,
-        connect_args={
-            "sslmode": "require",
-            "connect_timeout": 10
-        },
-        pool_pre_ping=True,
-        pool_recycle=300
-    )
-else:
-    # SQLite for development
-    engine = create_engine(
-        database_url,
-        connect_args={"check_same_thread": False}
-    )
+if not DATABASE_URL.startswith("postgresql"):
+    raise ValueError("Only PostgreSQL databases are supported. DATABASE_URL must start with 'postgresql://'")
+
+# PostgreSQL with SSL configuration
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={
+        "sslmode": "require",
+        "connect_timeout": 10
+    },
+    pool_pre_ping=True,
+    pool_recycle=300
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
