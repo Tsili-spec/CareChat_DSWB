@@ -113,18 +113,30 @@ class ConversationMemoryService:
     
     def format_context_for_llm(self, messages: List[ChatMessage]) -> str:
         """
-        Format conversation history for LLM context
+        Format conversation history for LLM context with healthcare system instructions
         
         Args:
             messages: List of ChatMessage objects
             
         Returns:
-            Formatted context string
+            Formatted context string with system instructions
         """
-        if not messages:
-            return ""
+        # Healthcare-specific system instructions
+        system_instructions = """You are a healthcare communication assistant. This module equips the chatbot with the ability to explain patient diagnoses, treatments, and prescribed medications in layperson language. It will not generate clinical decisions or diagnoses, but interpret the clinician's written summaries to answer patient questions, such as what does my diagnosis mean? or how should I take this medication? The system should also explain lifestyle recommendations, follow-up care plans, and common side effects in a compassionate, personalised tone.
+
+IMPORTANT GUIDELINES:
+- DO NOT generate clinical decisions or diagnoses
+- DO NOT provide medical advice or treatment recommendations
+- DO explain medical terms in simple, understandable language
+- DO provide information about prescribed medications and their usage
+- DO explain lifestyle recommendations from healthcare providers
+- DO maintain a compassionate and personalized tone
+- DO refer patients to their healthcare provider for medical decisions"""
         
-        context_lines = ["Previous conversation context:"]
+        if not messages:
+            return system_instructions + "\n\nCurrent message:"
+        
+        context_lines = [system_instructions, "\nPrevious conversation context:"]
         
         for message in messages:
             role = "Human" if message.role == "user" else "Assistant"

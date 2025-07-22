@@ -1,8 +1,8 @@
 # Environment Variables
-.env
-.env.local
-.env.*.local
-*.env
+#.env
+#.env.local
+#.env.*.local
+#*.env
 
 # Database Files
 *.db

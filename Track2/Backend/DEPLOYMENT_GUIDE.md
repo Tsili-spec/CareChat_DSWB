@@ -1,5 +1,13 @@
 # CareChat Backend - Deployment Guide
 
+## Healthcare Communication Assistant
+
+CareChat is configured as a specialized healthcare communication assistant that:
+- Explains medical terms and prescribed treatments in simple language
+- Maintains ethical boundaries by not providing medical advice or diagnoses
+- Helps patients understand their healthcare provider's instructions
+- Uses a compassionate, personalized communication style
+
 ## Environment Variables Configuration
 
 ### For Local Development

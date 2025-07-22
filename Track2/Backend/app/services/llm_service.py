@@ -30,7 +30,7 @@ class GeminiService:
             raise HTTPException(status_code=500, detail="Gemini API key not configured")
         
         # Use the correct Gemini API model and endpoint
-        model = kwargs.get("model", "gemini-2.0-flash")
+        model = kwargs.get("model", "gemini-2.5-pro")
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         
         # Use X-goog-api-key header as per Google AI Studio format
