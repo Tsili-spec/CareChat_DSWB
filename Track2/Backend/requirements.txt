@@ -1,4 +1,29 @@
+# Core FastAPI dependencies
 fastapi
+uvicorn
+
+# Database dependencies
 sqlalchemy
+psycopg2-binary
+
+# Pydantic and validation
 pydantic
+pydantic[email]
+
+# Environment and configuration
 python-dotenv
+
+# Authentication and security
+python-jose[cryptography]
+passlib[bcrypt]
+
+# HTTP client for external API calls
+httpx
+
+# Additional Python standard library (usually included)
+# typing - built-in for Python 3.5+
+# datetime - built-in
+# uuid - built-in
+# json - built-in
+# os - built-in
+# logging - built-in
