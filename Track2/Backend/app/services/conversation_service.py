@@ -123,11 +123,11 @@ class ConversationMemoryService:
             Formatted context string with system instructions
         """
         # Shortened healthcare system instructions for longer conversations
-        if len(messages) > 3:
+        if len(messages) > 5:
             system_instructions = """You are a healthcare professional assistant. Explain medical information in simple, compassionate terms.
 - Interpret clinician summaries in layperson language
 - Include disclaimer: "Please refer to your healthcare provider for medical decisions"
-- Keep responses under 150 words, be concise
+- Keep responses under 200 words, be concise
 - Use bullet points when helpful"""
         else:
             # Full instructions for shorter conversations
@@ -144,7 +144,7 @@ class ConversationMemoryService:
 - Don't provide medical advice beyond interpreting clinician input.
 
 **Response Guidelines:**
-- Keep responses under 150 words maximum.
+- Keep responses under 200 words maximum.
 - Be straight to the point and concise.
 - Use short, clear bullet points when helpful.
 - If you're uncertain, say: "I'm not sure—please check with your provider."
@@ -300,23 +300,29 @@ class ConversationMemoryService:
             conversation_count = len(conversations)
             message_count = 0
             
-            # Delete all messages in user's conversations
+            # Delete all messages in user's conversations FIRST (to avoid FK constraint)
             for conv in conversations:
                 messages = db.query(ChatMessage).filter(
                     ChatMessage.conversation_id == conv.conversation_id
                 ).all()
                 message_count += len(messages)
                 
-                # Delete messages
+                # Delete messages first
                 for message in messages:
                     db.delete(message)
             
-            # Delete conversations
+            # Commit message deletions before deleting conversations
+            db.commit()
+            
+            # Now delete conversations (no more FK constraint issues)
             db.query(Conversation).filter(
                 Conversation.patient_id == user_id
             ).delete()
             
-            # Delete user
+            # Commit conversation deletions
+            db.commit()
+            
+            # Finally, delete user
             from app.models.user import User
             user = db.query(User).filter(User.patient_id == user_id).first()
             if user:

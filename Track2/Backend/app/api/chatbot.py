@@ -1,5 +1,5 @@
 """
-Gemini Chat endpoint for CareChat with Conversational Memory
+Gemini Chat endpoint for CareChat with Conversational Memory and RAG
 """
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
@@ -12,6 +12,16 @@ from typing import List
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 logger = logging.getLogger(__name__)
+
+# Initialize RAG service on module load
+@router.on_event("startup")
+async def initialize_rag():
+    """Initialize RAG service for enhanced responses"""
+    try:
+        await gemini_service.initialize_rag()
+        logger.info("RAG service initialized successfully")
+    except Exception as e:
+        logger.warning(f"RAG service initialization failed: {e}")
 
 @router.post("/", response_model=ChatResponse)
 async def chat_with_memory(request: ChatMessageCreate, db: Session = Depends(get_db)):

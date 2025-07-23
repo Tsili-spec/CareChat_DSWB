@@ -1,29 +1,37 @@
-# Core FastAPI dependencies
+# Core FastAPI Framework
 fastapi
 uvicorn
+python-multipart
 
-# Database dependencies
+# Database
 sqlalchemy
 psycopg2-binary
+alembic
 
-# Pydantic and validation
-pydantic
-pydantic[email]
+# Authentication & Security
+bcrypt
+passlib
+pyjwt
+python-jose
 
-# Environment and configuration
+# Google AI (Gemini)
+google-generativeai
+
+# RAG System Dependencies
+sentence-transformers
+faiss-cpu
+pandas
+numpy
+scikit-learn
+
+# Environment & Configuration
 python-dotenv
+pydantic
+pydantic-settings
 
-# Authentication and security
-python-jose[cryptography]
-passlib[bcrypt]
-
-# HTTP client for external API calls
+# HTTP Client
 httpx
+requests
 
-# Additional Python standard library (usually included)
-# typing - built-in for Python 3.5+
-# datetime - built-in
-# uuid - built-in
-# json - built-in
-# os - built-in
-# logging - built-in
+# Email Validation
+email-validator
