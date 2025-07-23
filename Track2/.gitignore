@@ -262,6 +262,11 @@ test_*.py
 test/
 tests/output/
 
+# RAG Cache Files (optional - team may want to commit these for faster setup)
+Data/embeddings*.pkl
+Data/faiss_index*.bin
+Data/processed_clinical_data*.pkl
+
 # Documentation build
 docs/build/
 documentation/build/

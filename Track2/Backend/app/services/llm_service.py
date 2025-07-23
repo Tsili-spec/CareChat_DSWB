@@ -1,5 +1,5 @@
 """
-Gemini LLM Service for CareChat
+Gemini LLM Service for CareChat with RAG Integration
 """
 import httpx
 import json
@@ -10,31 +10,40 @@ from app.core.config import GEMINI_API_KEY
 class GeminiService:
     def __init__(self):
         self.timeout = 30.0
+        self.rag_service = None
         # Don't raise an error during initialization, check during requests
     
-    async def generate_response(self, prompt: str, max_words: int = 150, **kwargs) -> str:
+    async def initialize_rag(self):
+        """Initialize RAG service for enhanced responses"""
+        try:
+            from app.services.rag_service import rag_service
+            self.rag_service = rag_service
+            await self.rag_service.initialize()
+        except Exception as e:
+            # RAG is optional - continue without it if initialization fails
+            print(f"Warning: RAG service initialization failed: {e}")
+            self.rag_service = None
+    
+    async def generate_response(self, prompt: str, use_rag: bool = True, **kwargs) -> str:
         """
-        Generate response from Gemini AI with word limit control
+        Generate response from Gemini AI with optional RAG enhancement
         
         Args:
             prompt: Input prompt for the AI
-            max_words: Maximum number of words in response (default: 150)
+            use_rag: Whether to use RAG for context enhancement (default: True)
             **kwargs: Additional parameters (temperature, top_p, etc.)
         """
         try:
-            # Calculate approximate max tokens (roughly 1.3 tokens per word)
-            max_tokens = int(max_words * 1.3)
-            kwargs['max_tokens'] = max_tokens
+            # Use RAG to enhance prompt if available and requested
+            if use_rag and self.rag_service:
+                # Extract user message from prompt (assume it's at the end after "Current message:")
+                user_message = self._extract_user_message(prompt)
+                if user_message:
+                    prompt = await self.rag_service.get_rag_enhanced_prompt(user_message, prompt)
             
-            # Add word limit instruction to prompt
-            enhanced_prompt = f"{prompt}\n\nIMPORTANT: Keep your response to {max_words} words or fewer."
-            
-            response = await self._gemini_request(enhanced_prompt, **kwargs)
-            
-            # Validate word count and truncate if necessary
-            response = self._enforce_word_limit(response, max_words)
-            
+            response = await self._gemini_request(prompt, **kwargs)
             return response
+            
         except Exception as e:
             if isinstance(e, HTTPException):
                 raise e
@@ -42,6 +51,34 @@ class GeminiService:
                 status_code=500,
                 detail=f"Gemini service error: {str(e)}"
             )
+    
+    def _extract_user_message(self, prompt: str) -> Optional[str]:
+        """
+        Extract user message from the formatted prompt
+        
+        Args:
+            prompt: Full formatted prompt
+            
+        Returns:
+            Extracted user message or None
+        """
+        try:
+            # Look for "Current message:" in the prompt
+            if "Current message:" in prompt:
+                parts = prompt.split("Current message:")
+                if len(parts) > 1:
+                    return parts[-1].strip()
+            
+            # Fallback: look for "Human:" pattern
+            if "Human:" in prompt:
+                lines = prompt.split('\n')
+                for line in reversed(lines):
+                    if line.startswith("Human:"):
+                        return line.replace("Human:", "").strip()
+            
+            return None
+        except Exception:
+            return None
     
     def _enforce_word_limit(self, text: str, max_words: int) -> str:
         """
