@@ -2,7 +2,7 @@
 Conversation and Chat Message Pydantic schemas
 """
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Literal
 from datetime import datetime
 from uuid import UUID
 
@@ -10,6 +10,7 @@ class ChatMessageCreate(BaseModel):
     user_id: UUID = Field(..., description="The user's patient ID")
     message: str = Field(..., min_length=1, max_length=5000, description="The user's message")
     conversation_id: Optional[UUID] = Field(None, description="Existing conversation ID (if continuing)")
+    provider: Optional[Literal["gemini", "groq"]] = Field(default="groq", description="LLM provider to use")
 
 class ChatMessageResponse(BaseModel):
     message_id: UUID

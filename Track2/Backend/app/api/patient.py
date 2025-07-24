@@ -5,7 +5,7 @@ from app.db.database import get_db
 from app.models.user import User
 from app.schemas.user import (
     UserSignup, UserLogin, UserResponse, LoginResponse, 
-    TokenRefresh, TokenResponse
+    TokenRefresh, TokenResponse, UserUpdate
 )
 from app.core.jwt_auth import create_access_token, create_refresh_token, verify_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from passlib.context import CryptContext
@@ -173,6 +173,115 @@ async def get_patient_by_id(patient_id: UUID, db: Session = Depends(get_db)):
         raise
     except Exception as e:
         logger.error(f"Error fetching patient {patient_id}: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
+        )
+
+@router.patch("/patients/{patient_id}", response_model=UserResponse)
+async def update_patient(patient_id: UUID, user_update: UserUpdate, db: Session = Depends(get_db)):
+    """
+    Update patient information (partial update)
+    
+    **How it works:**
+    1. Validates the patient exists in the database
+    2. Updates only the provided fields (ignores None/null values)
+    3. Handles password hashing if a new password is provided
+    4. Validates uniqueness constraints for phone number and email
+    5. Returns the updated patient information
+    
+    **Fields that can be updated:**
+    - full_name: Patient's full name
+    - phone_number: Unique phone number (checked for duplicates)
+    - email: Email address (checked for duplicates, can be null)
+    - preferred_language: Language preference (e.g., 'en', 'fr')
+    - password: New password (will be securely hashed)
+    
+    **Security Note:** Ensure proper authorization in production.
+    """
+    try:
+        # Check if patient exists
+        patient = db.query(User).filter(User.patient_id == patient_id).first()
+        if not patient:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Patient not found"
+            )
+        
+        # Track what fields are being updated
+        updated_fields = []
+        
+        # Update only provided fields
+        if user_update.full_name is not None:
+            patient.full_name = user_update.full_name
+            updated_fields.append("full_name")
+        
+        if user_update.phone_number is not None:
+            # Check if phone number already exists (exclude current user)
+            existing_phone = db.query(User).filter(
+                User.phone_number == user_update.phone_number,
+                User.patient_id != patient_id
+            ).first()
+            if existing_phone:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Phone number already registered to another user"
+                )
+            patient.phone_number = user_update.phone_number
+            updated_fields.append("phone_number")
+        
+        if user_update.email is not None:
+            # Check if email already exists (exclude current user)
+            existing_email = db.query(User).filter(
+                User.email == user_update.email,
+                User.patient_id != patient_id
+            ).first()
+            if existing_email:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered to another user"
+                )
+            patient.email = user_update.email
+            updated_fields.append("email")
+        
+        if user_update.preferred_language is not None:
+            patient.preferred_language = user_update.preferred_language
+            updated_fields.append("preferred_language")
+        
+        if user_update.password is not None:
+            # Hash new password
+            hashed_password = pwd_context.hash(user_update.password)
+            patient.password_hash = hashed_password
+            updated_fields.append("password")
+        
+        # If no fields to update, return current data
+        if not updated_fields:
+            logger.info(f"No fields to update for patient {patient_id}")
+        else:
+            # Save changes
+            db.commit()
+            db.refresh(patient)
+            logger.info(f"Updated patient {patient_id}. Fields: {', '.join(updated_fields)}")
+        
+        return UserResponse(
+            patient_id=patient.patient_id,
+            full_name=patient.full_name,
+            phone_number=patient.phone_number,
+            email=patient.email,
+            preferred_language=patient.preferred_language
+        )
+        
+    except HTTPException:
+        raise
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Phone number or email already exists"
+        )
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error updating patient {patient_id}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"

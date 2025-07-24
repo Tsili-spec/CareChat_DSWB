@@ -17,6 +17,9 @@ python-jose
 # Google AI (Gemini)
 google-generativeai
 
+# Groq AI
+groq
+
 # RAG System Dependencies
 sentence-transformers
 faiss-cpu

@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from app.api import chatbot, feedback, patient
 from app.core.jwt_auth import create_access_token, verify_token
 from app.db.database import create_tables, check_database_connection
-from app.services.llm_service import gemini_service
+from app.services.llm_service import llm_service
 
 # Import models to register them with SQLAlchemy
 from app.models import user, conversation
@@ -22,7 +22,7 @@ async def startup_event():
         print("✅ Database tables created/verified successfully")
         
         print("Initializing RAG service...")
-        await gemini_service.initialize_rag()
+        await llm_service.initialize_rag()
         print("✅ RAG service initialized successfully")
         
     except Exception as e:
@@ -32,6 +32,12 @@ async def startup_event():
 @app.get("/")
 async def root():
     return {"message": "Welcome to CareChat Track2 Backend!"}
+
+@app.get("/health/llm")
+async def llm_health():
+    """Get health status of all LLM providers"""
+    from app.services.llm_service import llm_service
+    return llm_service.get_health_status()
 
 app.include_router(chatbot.router)
 app.include_router(feedback.router)

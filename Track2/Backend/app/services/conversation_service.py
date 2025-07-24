@@ -124,14 +124,15 @@ class ConversationMemoryService:
         """
         # Shortened healthcare system instructions for longer conversations
         if len(messages) > 5:
-            system_instructions = """You are a healthcare professional assistant. Explain medical information in simple, compassionate terms.
+            system_instructions = """You are a healthcare professional assistant working for Douala General Hospital(Hôpital Général de Douala) in Douala, Cameroon. Explain medical information in simple, compassionate terms.
 - Interpret clinician summaries in layperson language
-- Include disclaimer: "Please refer to your healthcare provider for medical decisions"
+- Include disclaimer: "Please refer to your healthcare provider at Douala General Hospital for medical decisions"
 - Keep responses under 200 words, be concise
-- Use bullet points when helpful"""
+- Use bullet points when helpful
+- Always reference Douala General hospital when talking of or referring individual to their healthcare provider"""
         else:
             # Full instructions for shorter conversations
-            system_instructions = """You are a **healthcare professional assistant** whose role is to **explain medical information** in simple, compassionate terms.
+            system_instructions = """You are a **healthcare professional assistant working for Douala General Hospital(Hôpital Général de Douala) in Douala, Cameroon** whose role is to **explain medical information** in simple, compassionate terms.
 
 **Your responsibilities:**
 - Interpret clinicians' summaries of diagnoses, treatments, medications.
@@ -149,6 +150,7 @@ class ConversationMemoryService:
 - Use short, clear bullet points when helpful.
 - If you're uncertain, say: "I'm not sure—please check with your provider."
 - Keep a warm, respectful tone.
+-Always reference Douala General hospital when talking of or referring individual to their healthcare provider
 """
         
         if not messages:

@@ -1,17 +1,36 @@
 """
-Gemini LLM Service for CareChat with RAG Integration
+Multi-LLM Service for CareChat with RAG Integration
+Supports both Gemini and Groq LLM providers
 """
 import httpx
 import json
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Literal
 from fastapi import HTTPException
-from app.core.config import GEMINI_API_KEY
+from app.core.config import GEMINI_API_KEY, GROQ_API_KEY
 
-class GeminiService:
+# Import Groq client
+try:
+    from groq import Groq
+    GROQ_AVAILABLE = True
+except ImportError:
+    GROQ_AVAILABLE = False
+    Groq = None
+
+LLMProvider = Literal["gemini", "groq"]
+
+class MultiLLMService:
     def __init__(self):
         self.timeout = 30.0
         self.rag_service = None
-        # Don't raise an error during initialization, check during requests
+        self.groq_client = None
+        
+        # Initialize Groq client if available and configured
+        if GROQ_AVAILABLE and GROQ_API_KEY:
+            try:
+                self.groq_client = Groq(api_key=GROQ_API_KEY)
+            except Exception as e:
+                print(f"Warning: Failed to initialize Groq client: {e}")
+                self.groq_client = None
     
     async def initialize_rag(self):
         """Initialize RAG service for enhanced responses"""
@@ -24,12 +43,19 @@ class GeminiService:
             print(f"Warning: RAG service initialization failed: {e}")
             self.rag_service = None
     
-    async def generate_response(self, prompt: str, use_rag: bool = True, **kwargs) -> str:
+    async def generate_response(
+        self, 
+        prompt: str, 
+        provider: LLMProvider = "groq",
+        use_rag: bool = True, 
+        **kwargs
+    ) -> str:
         """
-        Generate response from Gemini AI with optional RAG enhancement
+        Generate response from specified LLM provider with optional RAG enhancement
         
         Args:
             prompt: Input prompt for the AI
+            provider: LLM provider to use ("gemini" or "groq")
             use_rag: Whether to use RAG for context enhancement (default: True)
             **kwargs: Additional parameters (temperature, top_p, etc.)
         """
@@ -41,7 +67,17 @@ class GeminiService:
                 if user_message:
                     prompt = await self.rag_service.get_rag_enhanced_prompt(user_message, prompt)
             
-            response = await self._gemini_request(prompt, **kwargs)
+            # Route to appropriate provider
+            if provider == "groq":
+                response = await self._groq_request(prompt, **kwargs)
+            elif provider == "gemini":
+                response = await self._gemini_request(prompt, **kwargs)
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unsupported LLM provider: {provider}. Use 'gemini' or 'groq'"
+                )
+            
             return response
             
         except Exception as e:
@@ -49,7 +85,7 @@ class GeminiService:
                 raise e
             raise HTTPException(
                 status_code=500,
-                detail=f"Gemini service error: {str(e)}"
+                detail=f"{provider.title()} service error: {str(e)}"
             )
     
     def _extract_user_message(self, prompt: str) -> Optional[str]:
@@ -105,6 +141,52 @@ class GeminiService:
                 truncated = '.'.join(sentences[:-1]) + '.'
         
         return truncated
+    
+    async def _groq_request(self, prompt: str, **kwargs) -> str:
+        """Handle Groq API requests"""
+        if not GROQ_API_KEY:
+            raise HTTPException(status_code=500, detail="Groq API key not configured")
+        
+        if not self.groq_client:
+            raise HTTPException(status_code=500, detail="Groq client not initialized")
+        
+        try:
+            # Extract parameters with defaults
+            temperature = kwargs.get("temperature", 0.7)
+            max_tokens = kwargs.get("max_tokens", 1000)
+            top_p = kwargs.get("top_p", 1.0)
+            
+            # Create chat completion with fixed model
+            completion = self.groq_client.chat.completions.create(
+                model="gemma2-9b-it",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=temperature,
+                max_completion_tokens=max_tokens,
+                top_p=top_p,
+                stream=False,
+                stop=None,
+            )
+            
+            if completion.choices and len(completion.choices) > 0:
+                return completion.choices[0].message.content
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail="Empty response from Groq API"
+                )
+                
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+            raise HTTPException(
+                status_code=500,
+                detail=f"Groq API error: {str(e)}"
+            )
     
     async def _gemini_request(self, prompt: str, **kwargs) -> str:
         """Handle Gemini API requests using the Google AI Studio format"""
@@ -179,13 +261,26 @@ class GeminiService:
                 )
     
     def get_health_status(self) -> Dict[str, Any]:
-        """Get health status of the Gemini service"""
+        """Get health status of all LLM services"""
         return {
             "status": "healthy",
-            "provider": "gemini",
-            "configured": bool(GEMINI_API_KEY),
-            "message": "Gemini service is ready" if GEMINI_API_KEY else "Gemini API key not configured"
+            "providers": {
+                "gemini": {
+                    "configured": bool(GEMINI_API_KEY),
+                    "available": bool(GEMINI_API_KEY),
+                    "message": "Gemini service is ready" if GEMINI_API_KEY else "Gemini API key not configured"
+                },
+                "groq": {
+                    "configured": bool(GROQ_API_KEY),
+                    "available": bool(self.groq_client),
+                    "message": "Groq service is ready" if self.groq_client else "Groq not available or API key not configured"
+                }
+            },
+            "default_provider": "groq"
         }
 
-# Global Gemini service instance
-gemini_service = GeminiService()
+# Global Multi-LLM service instance
+llm_service = MultiLLMService()
+
+# Legacy alias for backward compatibility
+gemini_service = llm_service

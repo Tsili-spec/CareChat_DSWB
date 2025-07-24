@@ -39,6 +39,18 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
     expires_in: int = 1800
 
+class UserUpdate(BaseModel):
+    """Schema for partial user updates (PATCH)"""
+    full_name: Optional[str] = Field(None, min_length=1, max_length=200)
+    phone_number: Optional[str] = Field(None, min_length=8, max_length=20)
+    email: Optional[EmailStr] = None
+    preferred_language: Optional[str] = Field(None, max_length=10)
+    password: Optional[str] = Field(None, min_length=6)
+
+    class Config:
+        # Allow None values for optional fields
+        validate_assignment = True
+
 # Legacy support
 class UserCreate(BaseModel):
     name: str

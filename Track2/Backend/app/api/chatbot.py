@@ -1,9 +1,9 @@
 """
-Gemini Chat endpoint for CareChat with Conversational Memory and RAG
+Multi-LLM Chat endpoint for CareChat with Conversational Memory and RAG
 """
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
-from app.services.llm_service import gemini_service
+from app.services.llm_service import llm_service
 from app.services.conversation_service import conversation_memory
 from app.schemas.conversation import ChatMessageCreate, ChatResponse, ConversationHistoryResponse, ConversationResponse
 from app.db.database import get_db
@@ -18,10 +18,11 @@ logger = logging.getLogger(__name__)
 async def initialize_rag():
     """Initialize RAG service for enhanced responses"""
     try:
-        await gemini_service.initialize_rag()
+        await llm_service.initialize_rag()
         logger.info("RAG service initialized successfully")
     except Exception as e:
-        logger.warning(f"RAG service initialization failed: {e}")
+        logger.warning(f"Failed to initialize RAG service: {e}")
+        # Continue without RAG if initialization fails
 
 @router.post("/", response_model=ChatResponse)
 async def chat_with_memory(request: ChatMessageCreate, db: Session = Depends(get_db)):
@@ -74,19 +75,21 @@ async def chat_with_memory(request: ChatMessageCreate, db: Session = Depends(get
                 title=title
             )
         
-        # Get response from Gemini with healthcare guidelines
-        response_text = await gemini_service.generate_response(
+        # Get response from specified LLM provider with healthcare guidelines
+        response_text = await llm_service.generate_response(
             full_prompt,
+            provider=request.provider,
             temperature=0.3
         )
         
         # Add assistant message to conversation
+        model_name = f"{request.provider}-2.0-flash" if request.provider == "gemini" else "llama-4-maverick-17b"
         assistant_message = conversation_memory.add_message(
             db=db,
             conversation_id=conversation.conversation_id,
             role="assistant",
             content=response_text,
-            model_used="gemini-2.0-flash"
+            model_used=model_name
         )
         
         return ChatResponse(
@@ -105,7 +108,7 @@ async def chat_with_memory(request: ChatMessageCreate, db: Session = Depends(get
                 "timestamp": assistant_message.timestamp,
                 "model_used": assistant_message.model_used
             },
-            provider="gemini"
+            provider=request.provider
         )
         
     except HTTPException:
