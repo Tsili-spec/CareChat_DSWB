@@ -118,7 +118,7 @@ The Swagger UI provides an interactive interface where you can:
 
 Watch the backend in action:
 
-[![Backend Demo](assets/images/backend_demo_thumbnail.png)](assets/videos/backend_demo.mp4)
+
 
 > **Note**: Click the thumbnail to play the video.
 
