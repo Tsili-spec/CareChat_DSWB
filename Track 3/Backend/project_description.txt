@@ -1,0 +1,55 @@
+
+AI-Enhanced Blood Bank Stock Monitoring and Forecasting System
+Challenge description
+This track aimed at developing and validating a real-time AI-enhanced monitoring dashboard that
+enables DGH blood banks to track inventory levels accurately, forecast future demand, and optimise
+stock management, thereby improving efficiency, reducing waste and shortages, and potentially
+improving patient outcomes.
+4.1 System integration and data ingestion layer
+The foundation of this system lies in its ability to integrate seamlessly with existing hospital information
+systems, particularly the District Health Information System 2 (DHIS2). The data pipeline must support
+real-time ingestion of key variables, including donor demographics such as age, sex, occupation,
+clinical data such as blood type, screening results, and operational metrics such as donation dates, stock
+movements, and expiry dates. For secure, scalable, and reliable performance, participants can build this
+layer using RESTful APIs developed with Java Spring Boot or Python FastAPI, ensuring compatibility
+with other systems.
+4.2 Forecasting and AI modelling framework
+The forecasting engine predicts future blood demand based on clinical and operational indicators. This
+module will combine classical time series techniques, such as Seasonal-Trend Decomposition using
+Loess (STL) and ARIMA, with advanced machine learning models including XGBoost, Random
+Forests, and Neural Networks built using libraries like TensorFlow and scikit-learn.
+Feature engineering should be guided by exploratory data analysis and domain expertise, with
+predictive variables such as blood type usage patterns, patient diagnoses, department needs, day-of-
+week effects, and consumption trends. Variable selection methods like Lasso regression and feature
+importance rankings from tree-based models can be used to prioritise inputs and optimise model
+performance. All trained models should be deployed in an API accessible format to support integration
+with the frontend dashboard.
+4.3 Real time monitoring dashboard
+This module involves building an interactive, user-friendly dashboard that allows blood bank staff and
+hospital administrators to monitor inventory levels in real time. The dashboard should present stock
+levels segmented by blood type and status, such as available, reserved, near expiry, and time to expiry,
+using colour-coded visual indicators such as red for expired, green for good and yellow for new expiry.
+The participants should use React.js to build a responsive and accessible interface and integrate visual
+libraries like D3.js, Plotly, or Chart.js to create intuitive visualisations, including histograms, trend lines,
+and shelf-life indicators. The dashboard should support data filtering by date, blood type, and location
+and provide exportable reports for planning and audits.
+4.4 Inventory optimisation
+The inventory optimisation module synthesises forecasting outputs and real-time stock data to generate
+recommendations for optimal ordering quantities. It should account for routine delivery cycles, safety
+stock levels, wastage rates, and the cost implications of emergency replenishments. The goal is to enable
+decision-makers to balance clinical preparedness and financial constraints. This module can be built
+using linear programming or reinforcement learning frameworks, with optimisation models
+implemented in Python using libraries such as PuLP or SciPy. It should generate dynamic suggestions
+based on forecasted shortages, expiration risks, and usage trends, enabling proactive planning and
+reducing last-minute stockouts.
+4.5 Evaluation
+An evaluation strategy must be implemented to ensure the system’s usability, accuracy, and relevance
+to DGH’s operational workflows. Participants should conduct usability testing sessions with blood bank
+staff using interactive prototypes, followed by structured feedback collection through surveys,
+interviews, and walkthroughs.
+5. Expected Outcomes
+The expected outcome of Datathon will be the successful development and deployment of a cost-
+effective, multilingual patient feedback system, an LLM-powered patient support chatbot that enhances
+patient education, improves understanding of diagnoses and therapeutic plans, and increases adherence
+to treatment through accessible, personalised, and empathetic communication. A software application
+that will enhance accuracy in forecasting blood demand using AI models.
