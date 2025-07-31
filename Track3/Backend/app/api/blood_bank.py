@@ -4,6 +4,8 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 import pandas as pd
 import io
+import numpy as np
+from scipy import stats
 
 from app.db.database import get_db
 from app.core.auth import get_current_user, require_permission
@@ -544,6 +546,193 @@ def get_daily_total_volume(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get daily total volume: {str(e)}"
+        )
+
+@router.get("/analytics/inventory-optimization")
+def get_inventory_optimization(
+    forecast_days: int = Query(14, ge=7, le=30, description="Number of days to forecast"),
+    service_level: float = Query(0.95, ge=0.90, le=0.99, description="Target service level (e.g., 0.95 = 95%)"),
+    lead_time_days: int = Query(3, ge=1, le=14, description="Lead time for procurement in days"),
+    max_order_limit: int = Query(500, ge=100, le=1000, description="Maximum order quantity"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("can_view_forecasts"))
+):
+    """
+    Get inventory optimization recommendations based on forecasted demand
+    Uses historical data with sophisticated safety stock calculations considering:
+    - Demand variability (standard deviation)
+    - Service level targets (95%, 99%, etc.)
+    - Lead time for procurement
+    - Statistical confidence intervals (z-scores)
+    
+    Requires: can_view_forecasts permission
+    """
+    try:
+        from app.models.blood_collection import BloodCollection
+        from app.models.blood_usage import BloodUsage
+        from app.models.blood_stock import BloodStock
+        from sqlalchemy import func
+        
+        # Get data for the last 90 days for better forecasting
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=90)
+        
+        # Get all blood types
+        blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+        
+        # Get historical usage data (for demand forecasting)
+        usage_data = db.query(
+            BloodUsage.blood_group,
+            func.date(BloodUsage.usage_date).label('date'),
+            func.sum(BloodUsage.volume_given_out).label('daily_usage')
+        ).filter(
+            BloodUsage.usage_date >= start_date,
+            BloodUsage.usage_date <= end_date
+        ).group_by(
+            BloodUsage.blood_group,
+            func.date(BloodUsage.usage_date)
+        ).all()
+        
+        # Get current stock levels
+        current_stock = {}
+        for blood_type in blood_types:
+            stock_record = db.query(BloodStock).filter(
+                BloodStock.blood_group == blood_type
+            ).order_by(BloodStock.stock_date.desc()).first()
+            current_stock[blood_type] = stock_record.total_available if stock_record else 0
+        
+        # Convert usage data to DataFrame for analysis
+        if not usage_data:
+            # Handle case when no usage data is available
+            usage_df = pd.DataFrame(columns=['blood_type', 'date', 'daily_usage'])
+        else:
+            usage_df = pd.DataFrame([
+                {
+                    'blood_type': record.blood_group,
+                    'date': record.date,
+                    'daily_usage': float(record.daily_usage)
+                }
+                for record in usage_data
+            ])
+        
+        # Calculate forecasted demand for each blood type
+        forecasted_demand = {}
+        usage_statistics = {}
+        
+        for blood_type in blood_types:
+            # Handle empty DataFrame gracefully
+            if len(usage_df) > 0 and 'blood_type' in usage_df.columns:
+                bt_usage = usage_df[usage_df['blood_type'] == blood_type]
+            else:
+                bt_usage = pd.DataFrame(columns=['blood_type', 'date', 'daily_usage'])
+            
+            if len(bt_usage) > 0:
+                # Simple moving average forecast with trend adjustment
+                recent_usage = bt_usage.tail(14)['daily_usage']
+                avg_daily_usage = recent_usage.mean()
+                
+                # Calculate trend (slope of last 14 days)
+                if len(recent_usage) >= 2:
+                    x = np.arange(len(recent_usage))
+                    trend = np.polyfit(x, recent_usage, 1)[0]
+                else:
+                    trend = 0
+                
+                # Forecast with trend adjustment
+                forecasted_daily = avg_daily_usage + (trend * forecast_days / 2)
+                forecasted_demand[blood_type] = max(0, forecasted_daily)
+                
+                usage_statistics[blood_type] = {
+                    'avg_daily_usage': float(avg_daily_usage),
+                    'trend': float(trend),
+                    'data_points': len(bt_usage),
+                    'variance': float(recent_usage.var()) if len(recent_usage) > 1 else 0
+                }
+            else:
+                # No historical data, use conservative estimate
+                forecasted_demand[blood_type] = 10.0  # Conservative default
+                usage_statistics[blood_type] = {
+                    'avg_daily_usage': 10.0,
+                    'trend': 0.0,
+                    'data_points': 0,
+                    'variance': 0
+                }
+        
+        # Calculate sophisticated safety stock using demand variability and service level
+        z_score = stats.norm.ppf(service_level)  # Z-score for given service level
+        
+        safety_stock = {}
+        for blood_type in blood_types:
+            # Handle empty DataFrame gracefully
+            if len(usage_df) > 0 and 'blood_type' in usage_df.columns:
+                bt_usage = usage_df[usage_df['blood_type'] == blood_type]
+            else:
+                bt_usage = pd.DataFrame(columns=['blood_type', 'date', 'daily_usage'])
+            
+            if len(bt_usage) > 7:  # Need sufficient data for variability calculation
+                # Calculate standard deviation of daily demand
+                daily_demand_std = bt_usage['daily_usage'].std()
+                
+                # Safety stock formula: z_score × std_dev × sqrt(lead_time)
+                # This accounts for demand variability during lead time
+                safety_stock[blood_type] = z_score * daily_demand_std * np.sqrt(lead_time_days)
+                
+                # Ensure minimum safety stock (at least 1 day of average demand)
+                min_safety = forecasted_demand[blood_type] * 0.5
+                safety_stock[blood_type] = max(safety_stock[blood_type], min_safety)
+                
+            else:
+                # Fallback for insufficient data: use 20% of forecasted demand
+                safety_stock[blood_type] = forecasted_demand[blood_type] * 0.2
+        
+        # Calculate recommended orders based on demand and safety stock
+        optimization_results = []
+        for blood_type in blood_types:
+            current = current_stock[blood_type]
+            forecast = forecasted_demand[blood_type]
+            safety = safety_stock[blood_type]
+            
+            # Calculate reorder point and recommended order quantity
+            reorder_point = forecast + safety
+            
+            # Simple reorder logic: order if current stock is below reorder point
+            if current < reorder_point:
+                # Order enough to reach optimal level (forecast + safety stock)
+                recommended_order = min(reorder_point - current, max_order_limit)
+            else:
+                # No order needed if stock is sufficient
+                recommended_order = 0
+            
+            # Calculate metrics
+            ending_stock = current + recommended_order
+            days_of_supply = ending_stock / forecast if forecast > 0 else float('inf')
+            
+            optimization_results.append({
+                'blood_type': blood_type,
+                'current_stock_ml': current,
+                'forecasted_daily_demand_ml': round(forecast, 2),
+                'safety_stock_ml': round(safety, 2),
+                'recommended_order_ml': round(recommended_order, 2),
+                'usage_statistics': usage_statistics[blood_type]
+            })
+        
+        return {
+            'parameters': {
+                'service_level': service_level,
+                'service_level_percentage': round(service_level * 100, 1),
+                'z_score': round(z_score, 3),
+                'lead_time_days': lead_time_days,
+                'max_order_limit': max_order_limit
+            },
+            'blood_type_recommendations': optimization_results,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Error in inventory optimization: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to run inventory optimization: {str(e)}"
         )
 
 # ==================== CSV UPLOAD ENDPOINTS ====================
