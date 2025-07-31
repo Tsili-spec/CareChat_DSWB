@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     FORECAST_HORIZON_DAYS: int = 30
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = [*]
+    BACKEND_CORS_ORIGINS: List[str] = ["*"]
     
     # File Storage
     UPLOAD_DIR: str = "uploads/"
