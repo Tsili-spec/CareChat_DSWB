@@ -1,0 +1,628 @@
+{
+  "users": {
+    "columns": [
+      {
+        "name": "id",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": "nextval('users_id_seq'::regclass)",
+        "autoincrement": true
+      },
+      {
+        "name": "username",
+        "type": "VARCHAR(50)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "email",
+        "type": "VARCHAR(100)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "full_name",
+        "type": "VARCHAR(200)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "hashed_password",
+        "type": "VARCHAR(100)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "role",
+        "type": "VARCHAR(50)",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR(100)",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "is_active",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "is_verified",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "last_login",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "can_manage_inventory",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "can_view_forecasts",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "can_manage_donors",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "can_access_reports",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "can_manage_users",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "can_view_analytics",
+        "type": "BOOLEAN",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "phone",
+        "type": "VARCHAR(20)",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "address",
+        "type": "TEXT",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "employee_id",
+        "type": "VARCHAR(50)",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "position",
+        "type": "VARCHAR(100)",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "license_number",
+        "type": "VARCHAR(100)",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "reset_token",
+        "type": "VARCHAR(100)",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "reset_token_expires",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "failed_login_attempts",
+        "type": "INTEGER",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "locked_until",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": "now()",
+        "autoincrement": false
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": "now()",
+        "autoincrement": false
+      },
+      {
+        "name": "created_by",
+        "type": "INTEGER",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      }
+    ],
+    "primary_keys": [
+      "id"
+    ],
+    "foreign_keys": [],
+    "indexes": [
+      {
+        "name": "ix_users_email",
+        "columns": [
+          "email"
+        ],
+        "unique": true
+      },
+      {
+        "name": "ix_users_id",
+        "columns": [
+          "id"
+        ],
+        "unique": false
+      },
+      {
+        "name": "ix_users_username",
+        "columns": [
+          "username"
+        ],
+        "unique": true
+      },
+      {
+        "name": "users_employee_id_key",
+        "columns": [
+          "employee_id"
+        ],
+        "unique": true
+      }
+    ]
+  },
+  "blood_collections": {
+    "columns": [
+      {
+        "name": "donation_record_id",
+        "type": "UUID",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "donor_age",
+        "type": "INTEGER",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "donor_gender",
+        "type": "VARCHAR(1)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "donor_occupation",
+        "type": "VARCHAR(100)",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "blood_type",
+        "type": "VARCHAR(10)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "collection_site",
+        "type": "VARCHAR(200)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "donation_date",
+        "type": "DATE",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "expiry_date",
+        "type": "DATE",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "collection_volume_ml",
+        "type": "DOUBLE PRECISION",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "hemoglobin_g_dl",
+        "type": "DOUBLE PRECISION",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "created_by",
+        "type": "INTEGER",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": "now()",
+        "autoincrement": false
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": "now()",
+        "autoincrement": false
+      }
+    ],
+    "primary_keys": [
+      "donation_record_id"
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "created_by"
+        ],
+        "referred_table": "users",
+        "referred_columns": [
+          "id"
+        ]
+      }
+    ],
+    "indexes": [
+      {
+        "name": "ix_blood_collections_blood_type",
+        "columns": [
+          "blood_type"
+        ],
+        "unique": false
+      },
+      {
+        "name": "ix_blood_collections_donation_date",
+        "columns": [
+          "donation_date"
+        ],
+        "unique": false
+      },
+      {
+        "name": "ix_blood_collections_donation_record_id",
+        "columns": [
+          "donation_record_id"
+        ],
+        "unique": false
+      }
+    ]
+  },
+  "blood_usage": {
+    "columns": [
+      {
+        "name": "usage_id",
+        "type": "UUID",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "purpose",
+        "type": "VARCHAR(50)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "department",
+        "type": "VARCHAR(100)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "blood_group",
+        "type": "VARCHAR(10)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "volume_given_out",
+        "type": "DOUBLE PRECISION",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "usage_date",
+        "type": "DATE",
+        "nullable": false,
+        "default": "CURRENT_DATE",
+        "autoincrement": false
+      },
+      {
+        "name": "individual_name",
+        "type": "VARCHAR(200)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "patient_location",
+        "type": "VARCHAR(200)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "processed_by",
+        "type": "INTEGER",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": "now()",
+        "autoincrement": false
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": "now()",
+        "autoincrement": false
+      }
+    ],
+    "primary_keys": [
+      "usage_id"
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "processed_by"
+        ],
+        "referred_table": "users",
+        "referred_columns": [
+          "id"
+        ]
+      }
+    ],
+    "indexes": [
+      {
+        "name": "ix_blood_usage_blood_group",
+        "columns": [
+          "blood_group"
+        ],
+        "unique": false
+      },
+      {
+        "name": "ix_blood_usage_usage_date",
+        "columns": [
+          "usage_date"
+        ],
+        "unique": false
+      },
+      {
+        "name": "ix_blood_usage_usage_id",
+        "columns": [
+          "usage_id"
+        ],
+        "unique": false
+      }
+    ]
+  },
+  "blood_stock": {
+    "columns": [
+      {
+        "name": "stock_id",
+        "type": "UUID",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "blood_group",
+        "type": "VARCHAR(10)",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "total_available",
+        "type": "DOUBLE PRECISION",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "total_near_expiry",
+        "type": "DOUBLE PRECISION",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "total_expired",
+        "type": "DOUBLE PRECISION",
+        "nullable": false,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "stock_date",
+        "type": "DATE",
+        "nullable": false,
+        "default": "CURRENT_DATE",
+        "autoincrement": false
+      },
+      {
+        "name": "donation_record_id",
+        "type": "UUID",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "usage_record_id",
+        "type": "UUID",
+        "nullable": true,
+        "default": null,
+        "autoincrement": false
+      },
+      {
+        "name": "created_at",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": "now()",
+        "autoincrement": false
+      },
+      {
+        "name": "updated_at",
+        "type": "TIMESTAMP",
+        "nullable": true,
+        "default": "now()",
+        "autoincrement": false
+      }
+    ],
+    "primary_keys": [
+      "stock_id"
+    ],
+    "foreign_keys": [
+      {
+        "constrained_columns": [
+          "donation_record_id"
+        ],
+        "referred_table": "blood_collections",
+        "referred_columns": [
+          "donation_record_id"
+        ]
+      },
+      {
+        "constrained_columns": [
+          "usage_record_id"
+        ],
+        "referred_table": "blood_usage",
+        "referred_columns": [
+          "usage_id"
+        ]
+      }
+    ],
+    "indexes": [
+      {
+        "name": "idx_blood_stock_blood_group_date",
+        "columns": [
+          "blood_group",
+          "stock_date"
+        ],
+        "unique": false
+      },
+      {
+        "name": "idx_blood_stock_donation_ref",
+        "columns": [
+          "donation_record_id"
+        ],
+        "unique": false
+      },
+      {
+        "name": "idx_blood_stock_usage_ref",
+        "columns": [
+          "usage_record_id"
+        ],
+        "unique": false
+      },
+      {
+        "name": "ix_blood_stock_blood_group",
+        "columns": [
+          "blood_group"
+        ],
+        "unique": false
+      },
+      {
+        "name": "ix_blood_stock_stock_date",
+        "columns": [
+          "stock_date"
+        ],
+        "unique": false
+      },
+      {
+        "name": "ix_blood_stock_stock_id",
+        "columns": [
+          "stock_id"
+        ],
+        "unique": false
+      }
+    ]
+  }
+}
