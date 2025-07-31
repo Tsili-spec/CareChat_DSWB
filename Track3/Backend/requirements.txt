@@ -19,8 +19,10 @@ pydantic-settings
 httpx
 requests
 
-# Data Processing
+# Data Processing & Analytics
 pandas
+numpy
+scipy
 
 # Development & Testing
 pytest
