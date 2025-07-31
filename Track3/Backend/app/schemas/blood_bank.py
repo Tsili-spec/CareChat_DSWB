@@ -19,12 +19,6 @@ class Gender(str, Enum):
     MALE = "M"
     FEMALE = "F"
 
-class UsagePurpose(str, Enum):
-    TRANSFUSION = "transfusion"
-    EMERGENCY = "emergency"
-    SURGERY = "surgery"
-    TRANSFER = "transfer"
-
 # ==================== BLOOD COLLECTION SCHEMAS ====================
 
 class BloodCollectionBase(BaseModel):
@@ -43,10 +37,16 @@ class BloodCollectionCreate(BloodCollectionBase):
     pass
 
 class BloodCollectionUpdate(BaseModel):
+    donor_age: Optional[int] = Field(None, ge=18, le=70, description="Donor age (18-70)")
+    donor_gender: Optional[Gender] = None
     donor_occupation: Optional[str] = Field(None, max_length=100)
+    
+    blood_type: Optional[BloodType] = None
     collection_site: Optional[str] = Field(None, max_length=200)
+    donation_date: Optional[date] = None
     expiry_date: Optional[date] = None
-    hemoglobin_g_dl: Optional[float] = Field(None, gt=0, le=20)
+    collection_volume_ml: Optional[float] = Field(None, gt=0, le=500, description="Collection volume in ml")
+    hemoglobin_g_dl: Optional[float] = Field(None, gt=0, le=20, description="Hemoglobin level in g/dL")
 
 class BloodCollectionResponse(BloodCollectionBase):
     donation_record_id: Union[str, uuid.UUID]
@@ -59,22 +59,25 @@ class BloodCollectionResponse(BloodCollectionBase):
 # ==================== BLOOD USAGE SCHEMAS ====================
 
 class BloodUsageBase(BaseModel):
-    purpose: UsagePurpose
+    purpose: str = Field(..., max_length=100, description="Purpose of blood usage")
     department: str = Field(..., max_length=100)
     blood_group: BloodType
     volume_given_out: float = Field(..., gt=0, le=500, description="Volume given out in ml")
     usage_date: date
-    individual_name: str = Field(..., min_length=2, max_length=200, description="Name of individual blood was given to")
+    individual_name: Optional[str] = Field(None, min_length=2, max_length=200, description="Name of individual blood was given to")
     patient_location: str = Field(..., max_length=200, description="Hospital name where patient is located")
 
 class BloodUsageCreate(BloodUsageBase):
     pass
 
 class BloodUsageUpdate(BaseModel):
-    purpose: Optional[UsagePurpose] = None
+    purpose: Optional[str] = Field(None, max_length=100, description="Purpose of blood usage")
     department: Optional[str] = Field(None, max_length=100)
-    individual_name: Optional[str] = Field(None, min_length=2, max_length=200)
-    patient_location: Optional[str] = Field(None, max_length=200)
+    blood_group: Optional[BloodType] = None
+    volume_given_out: Optional[float] = Field(None, gt=0, le=500, description="Volume given out in ml")
+    usage_date: Optional[date] = None
+    individual_name: Optional[str] = Field(None, min_length=2, max_length=200, description="Name of individual blood was given to")
+    patient_location: Optional[str] = Field(None, max_length=200, description="Hospital name where patient is located")
 
 class BloodUsageResponse(BloodUsageBase):
     usage_id: Union[str, uuid.UUID]
