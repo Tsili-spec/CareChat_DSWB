@@ -158,6 +158,8 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 | `can_view_forecasts` | ✅ | ✅ | ✅ | ✅ |
 | `can_view_analytics` | ✅ | ✅ | ✅ | ✅ |
 
+> **📖 For comprehensive RBAC documentation including endpoint-specific permissions, access control examples, and implementation details, see [RBAC_GUIDE.md](./RBAC_GUIDE.md)**
+
 ## 🔧 Authentication Implementation Details
 
 ### 📊 Database Schema

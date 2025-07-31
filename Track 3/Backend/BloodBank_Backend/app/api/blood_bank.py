@@ -7,118 +7,117 @@ from app.db.database import get_db
 from app.core.auth import get_current_user, require_permission
 from app.models.user import User
 from app.schemas.blood_bank import (
-    BloodDonationCreate, BloodDonationUpdate, BloodDonationResponse,
+    BloodCollectionCreate, BloodCollectionUpdate, BloodCollectionResponse,
     BloodUsageCreate, BloodUsageUpdate, BloodUsageResponse,
-    BloodInventoryUpdate, BloodInventoryResponse,
-    InventoryTransactionResponse, DHIS2SyncRequest, DHIS2SyncResponse
+    BloodInventorySummary, InventoryAlert, DHIS2SyncRequest, DHIS2SyncResponse
 )
 from app.services.blood_bank_service import BloodBankService
 import logging
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/blood-bank", tags=["Blood Bank Management"])
+router = APIRouter(prefix="/blood-bank")
 
-# ==================== DONATION ENDPOINTS ====================
+# ==================== COLLECTION ENDPOINTS ====================
 
-@router.post("/donations", response_model=BloodDonationResponse, status_code=status.HTTP_201_CREATED)
-def create_donation(
-    donation_data: BloodDonationCreate,
+@router.post("/collections", response_model=BloodCollectionResponse, status_code=status.HTTP_201_CREATED)
+def create_collection(
+    collection_data: BloodCollectionCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("can_manage_donors"))
 ):
     """
-    Create a new blood donation record
+    Create a new blood collection record
     
     Requires: can_manage_donors permission
     """
     try:
         service = BloodBankService(db)
-        donation = service.create_donation(donation_data, current_user.id)
-        return donation
+        collection = service.create_collection(collection_data, current_user.id)
+        return collection
     except Exception as e:
-        logger.error(f"Error creating donation: {e}")
+        logger.error(f"Error creating collection: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to create donation: {str(e)}"
+            detail=f"Failed to create collection: {str(e)}"
         )
 
-@router.get("/donations", response_model=List[BloodDonationResponse])
-def get_donations(
+@router.get("/collections", response_model=List[BloodCollectionResponse])
+def get_collections(
     blood_type: Optional[str] = Query(None, description="Filter by blood type (A+, A-, B+, B-, AB+, AB-, O+, O-)"),
-    collection_date_from: Optional[datetime] = Query(None, description="Filter donations from this date"),
-    collection_date_to: Optional[datetime] = Query(None, description="Filter donations up to this date"),
+    collection_date_from: Optional[datetime] = Query(None, description="Filter collections from this date"),
+    collection_date_to: Optional[datetime] = Query(None, description="Filter collections up to this date"),
     donor_id: Optional[str] = Query(None, description="Filter by donor ID"),
-    processing_status: Optional[str] = Query(None, description="Filter by processing status"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     offset: int = Query(0, ge=0, description="Number of records to skip"),
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("can_view_analytics"))
 ):
     """
-    Get blood donation records with filtering
+    Get blood collection records with filtering
     
     Requires: can_view_analytics permission
     """
     service = BloodBankService(db)
-    donations = service.get_donations(
+    collections = service.get_collections(
         blood_type=blood_type,
         collection_date_from=collection_date_from,
         collection_date_to=collection_date_to,
         donor_id=donor_id,
-        processing_status=processing_status,
         limit=limit,
         offset=offset
     )
-    return donations
+    return collections
 
-@router.get("/donations/{donation_id}", response_model=BloodDonationResponse)
-def get_donation(
-    donation_id: int,
+@router.get("/collections/{donation_record_id}", response_model=BloodCollectionResponse)
+def get_collection(
+    donation_record_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("can_view_analytics"))
 ):
     """
-    Get specific donation record by ID
+    Get specific collection record by ID
     
     Requires: can_view_analytics permission
     """
-    from app.models.blood_donation import BloodDonation
+    from app.models.blood_collection import BloodCollection
     
-    donation = db.query(BloodDonation).filter(BloodDonation.donation_id == donation_id).first()
-    if not donation:
+    collection = db.query(BloodCollection).filter(
+        BloodCollection.donation_record_id == donation_record_id
+    ).first()
+    if not collection:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Donation {donation_id} not found"
+            detail=f"Collection {donation_record_id} not found"
         )
-    return donation
+    return collection
 
-@router.put("/donations/{donation_id}", response_model=BloodDonationResponse)
-def update_donation(
-    donation_id: int,
-    update_data: BloodDonationUpdate,
+@router.put("/collections/{donation_record_id}", response_model=BloodCollectionResponse)
+def update_collection(
+    donation_record_id: str,
+    update_data: BloodCollectionUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("can_manage_donors"))
 ):
     """
-    Update donation record
+    Update collection record
     
     Requires: can_manage_donors permission
     """
     try:
         service = BloodBankService(db)
-        donation = service.update_donation(donation_id, update_data, current_user.id)
-        return donation
+        collection = service.update_collection(donation_record_id, update_data, current_user.id)
+        return collection
     except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e)
         )
     except Exception as e:
-        logger.error(f"Error updating donation {donation_id}: {e}")
+        logger.error(f"Error updating collection {donation_record_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to update donation: {str(e)}"
+            detail=f"Failed to update collection: {str(e)}"
         )
 
 # ==================== USAGE ENDPOINTS ====================
@@ -155,8 +154,7 @@ def get_usage_records(
     blood_group: Optional[str] = Query(None, description="Filter by blood group"),
     usage_date_from: Optional[datetime] = Query(None, description="Filter usage from this date"),
     usage_date_to: Optional[datetime] = Query(None, description="Filter usage up to this date"),
-    patient_id: Optional[str] = Query(None, description="Filter by patient ID"),
-    recipient_location: Optional[str] = Query(None, description="Filter by recipient location"),
+    patient_location: Optional[str] = Query(None, description="Filter by patient location"),
     limit: int = Query(100, ge=1, le=1000),
     offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
@@ -172,8 +170,7 @@ def get_usage_records(
         blood_group=blood_group,
         usage_date_from=usage_date_from,
         usage_date_to=usage_date_to,
-        patient_id=patient_id,
-        recipient_location=recipient_location,
+        patient_location=patient_location,
         limit=limit,
         offset=offset
     )
@@ -181,7 +178,7 @@ def get_usage_records(
 
 @router.get("/usage/{usage_id}", response_model=BloodUsageResponse)
 def get_usage_record(
-    usage_id: int,
+    usage_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("can_access_reports"))
 ):
@@ -202,13 +199,13 @@ def get_usage_record(
 
 @router.put("/usage/{usage_id}", response_model=BloodUsageResponse)
 def update_usage_record(
-    usage_id: int,
+    usage_id: str,
     update_data: BloodUsageUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("can_manage_inventory"))
 ):
     """
-    Update usage record (e.g., crossmatch results, transfusion outcome)
+    Update usage record
     
     Requires: can_manage_inventory permission
     """
@@ -232,7 +229,7 @@ def update_usage_record(
 
 # ==================== INVENTORY ENDPOINTS ====================
 
-@router.get("/inventory", response_model=List[BloodInventoryResponse])
+@router.get("/inventory", response_model=List[BloodInventorySummary])
 def get_current_inventory(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_permission("can_view_analytics"))
@@ -246,7 +243,7 @@ def get_current_inventory(
     inventory = service.get_current_inventory()
     return inventory
 
-@router.get("/inventory/{blood_group}", response_model=BloodInventoryResponse)
+@router.get("/inventory/{blood_group}", response_model=BloodInventorySummary)
 def get_inventory_by_blood_group(
     blood_group: str,
     db: Session = Depends(get_db),
@@ -265,29 +262,6 @@ def get_inventory_by_blood_group(
             detail=f"Inventory for blood group {blood_group} not found"
         )
     return inventory
-
-@router.put("/inventory/{blood_group}", response_model=BloodInventoryResponse)
-def update_inventory_settings(
-    blood_group: str,
-    update_data: BloodInventoryUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("can_manage_inventory"))
-):
-    """
-    Update inventory thresholds and settings
-    
-    Requires: can_manage_inventory permission
-    """
-    try:
-        service = BloodBankService(db)
-        inventory = service.update_inventory_settings(blood_group, update_data)
-        return inventory
-    except Exception as e:
-        logger.error(f"Error updating inventory settings for {blood_group}: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Failed to update inventory settings: {str(e)}"
-        )
 
 # ==================== ALERTS AND MONITORING ====================
 
@@ -349,20 +323,11 @@ def get_inventory_analytics(
     # Add summary metrics
     current_inventory = analytics["current_inventory"]
     total_current_volume = sum(inv["current_volume_ml"] for inv in current_inventory)
-    total_available_volume = sum(inv["available_volume_ml"] for inv in current_inventory)
-    
-    # Count stock status categories
-    stock_status_counts = {}
-    for inv in current_inventory:
-        status = inv["stock_status"]
-        stock_status_counts[status] = stock_status_counts.get(status, 0) + 1
     
     analytics["summary"] = {
         "timestamp": datetime.utcnow(),
         "total_current_volume_ml": total_current_volume,
-        "total_available_volume_ml": total_available_volume,
         "blood_groups_tracked": len(current_inventory),
-        "stock_status_distribution": stock_status_counts,
         "period_collections": {
             "total_volume_ml": sum(col["total_volume_ml"] for col in analytics["collections"]),
             "total_units": sum(col["total_units"] for col in analytics["collections"])
@@ -413,19 +378,19 @@ def get_system_status(
     Requires: Any authenticated user
     """
     try:
-        # Get basic statistics
-        from app.models.blood_donation import BloodDonation
+        # Get basic statistics using new models
+        from app.models.blood_collection import BloodCollection
         from app.models.blood_usage import BloodUsage
-        from app.models.blood_inventory import BloodInventory
+        from app.models.blood_stock import BloodStock
         
-        total_donations = db.query(BloodDonation).count()
+        total_collections = db.query(BloodCollection).count()
         total_usage_records = db.query(BloodUsage).count()
-        blood_groups_tracked = db.query(BloodInventory).count()
+        total_stock_records = db.query(BloodStock).count()
         
         # Get recent activity (last 24 hours)
         yesterday = datetime.utcnow() - timedelta(hours=24)
-        recent_donations = db.query(BloodDonation).filter(
-            BloodDonation.created_at >= yesterday
+        recent_collections = db.query(BloodCollection).filter(
+            BloodCollection.created_at >= yesterday
         ).count()
         recent_usage = db.query(BloodUsage).filter(
             BloodUsage.created_at >= yesterday
@@ -436,10 +401,10 @@ def get_system_status(
             "timestamp": datetime.utcnow(),
             "database_connected": True,
             "statistics": {
-                "total_donations": total_donations,
+                "total_collections": total_collections,
                 "total_usage_records": total_usage_records,
-                "blood_groups_tracked": blood_groups_tracked,
-                "recent_donations_24h": recent_donations,
+                "total_stock_records": total_stock_records,
+                "recent_collections_24h": recent_collections,
                 "recent_usage_24h": recent_usage
             },
             "user_permissions": {
