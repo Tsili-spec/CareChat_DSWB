@@ -289,6 +289,263 @@ def get_system_status(
             "error": str(e)
         }
 
+# ==================== ANALYTICS ENDPOINTS ====================
+
+@router.get("/analytics/daily-volume-trends")
+def get_daily_volume_trends(
+    days: int = Query(30, ge=1, le=90, description="Number of days to include in trends"),
+    blood_types: Optional[List[str]] = Query(None, description="Filter by specific blood types"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("can_view_analytics"))
+):
+    """
+    Get daily volume trends for different blood types
+    Returns data for line plot showing volume donated, used, and in stock
+    
+    Requires: can_view_analytics permission
+    """
+    try:
+        from app.models.blood_collection import BloodCollection
+        from app.models.blood_usage import BloodUsage
+        from app.models.blood_stock import BloodStock
+        from sqlalchemy import func, case
+        
+        # Calculate date range
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=days)
+        
+        # All blood types if not specified
+        if not blood_types:
+            blood_types = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+        
+        trends_data = {}
+        
+        for blood_type in blood_types:
+            # Get daily donations
+            daily_donations = db.query(
+                func.date(BloodCollection.donation_date).label('date'),
+                func.sum(BloodCollection.collection_volume_ml).label('donated_volume')
+            ).filter(
+                BloodCollection.blood_type == blood_type,
+                BloodCollection.donation_date >= start_date,
+                BloodCollection.donation_date <= end_date
+            ).group_by(func.date(BloodCollection.donation_date)).all()
+            
+            # Get daily usage
+            daily_usage = db.query(
+                func.date(BloodUsage.usage_date).label('date'),
+                func.sum(BloodUsage.volume_given_out).label('used_volume')
+            ).filter(
+                BloodUsage.blood_group == blood_type,
+                BloodUsage.usage_date >= start_date,
+                BloodUsage.usage_date <= end_date
+            ).group_by(func.date(BloodUsage.usage_date)).all()
+            
+            # Get daily stock levels (latest stock for each day)
+            daily_stock = db.query(
+                func.date(BloodStock.stock_date).label('date'),
+                func.sum(BloodStock.total_available).label('stock_volume')
+            ).filter(
+                BloodStock.blood_group == blood_type,
+                BloodStock.stock_date >= start_date,
+                BloodStock.stock_date <= end_date
+            ).group_by(func.date(BloodStock.stock_date)).all()
+            
+            # Create date series
+            date_series = []
+            current_date = start_date
+            while current_date <= end_date:
+                date_series.append(current_date)
+                current_date += timedelta(days=1)
+            
+            # Convert to dictionaries for easy lookup
+            donations_dict = {d.date: float(d.donated_volume or 0) for d in daily_donations}
+            usage_dict = {d.date: float(d.used_volume or 0) for d in daily_usage}
+            stock_dict = {d.date: float(d.stock_volume or 0) for d in daily_stock}
+            
+            # Build trend data
+            trends_data[blood_type] = {
+                "dates": [date.isoformat() for date in date_series],
+                "donated_volume": [donations_dict.get(date, 0) for date in date_series],
+                "used_volume": [usage_dict.get(date, 0) for date in date_series],
+                "stock_volume": [stock_dict.get(date, 0) for date in date_series]
+            }
+        
+        return {
+            "period": {
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+                "days": days
+            },
+            "blood_types": blood_types,
+            "trends": trends_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting daily volume trends: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get volume trends: {str(e)}"
+        )
+
+@router.get("/analytics/volume-by-blood-type")
+def get_volume_by_blood_type(
+    days: int = Query(30, ge=1, le=365, description="Number of days to analyze"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("can_view_analytics"))
+):
+    """
+    Get total volume comparison by blood type (donations vs usage)
+    Returns data for bar chart comparing donation volume vs usage volume
+    
+    Requires: can_view_analytics permission
+    """
+    try:
+        from app.models.blood_collection import BloodCollection
+        from app.models.blood_usage import BloodUsage
+        from sqlalchemy import func
+        
+        # Calculate date range
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=days)
+        
+        # Get total donations by blood type
+        donations_by_type = db.query(
+            BloodCollection.blood_type,
+            func.sum(BloodCollection.collection_volume_ml).label('total_donated')
+        ).filter(
+            BloodCollection.donation_date >= start_date,
+            BloodCollection.donation_date <= end_date
+        ).group_by(BloodCollection.blood_type).all()
+        
+        # Get total usage by blood type
+        usage_by_type = db.query(
+            BloodUsage.blood_group,
+            func.sum(BloodUsage.volume_given_out).label('total_used')
+        ).filter(
+            BloodUsage.usage_date >= start_date,
+            BloodUsage.usage_date <= end_date
+        ).group_by(BloodUsage.blood_group).all()
+        
+        # Convert to dictionaries
+        donations_dict = {d.blood_type: float(d.total_donated or 0) for d in donations_by_type}
+        usage_dict = {u.blood_group: float(u.total_used or 0) for u in usage_by_type}
+        
+        # All blood types
+        all_blood_types = set(donations_dict.keys()) | set(usage_dict.keys())
+        blood_types = sorted(list(all_blood_types))
+        
+        # Build comparison data
+        comparison_data = []
+        for blood_type in blood_types:
+            donated = donations_dict.get(blood_type, 0)
+            used = usage_dict.get(blood_type, 0)
+            
+            comparison_data.append({
+                "blood_type": blood_type,
+                "donated_volume": donated,
+                "used_volume": used
+            })
+        
+        return {
+            "period": {
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+                "days": days
+            },
+            "summary": {
+                "total_donated": sum(d["donated_volume"] for d in comparison_data),
+                "total_used": sum(d["used_volume"] for d in comparison_data)
+            },
+            "blood_types": comparison_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting volume by blood type: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get volume by blood type: {str(e)}"
+        )
+
+@router.get("/analytics/daily-total-volume")
+def get_daily_total_volume(
+    days: int = Query(30, ge=1, le=90, description="Number of days to include"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("can_view_analytics"))
+):
+    """
+    Get daily total blood volume (donated vs used)
+    Returns data for line plot showing total daily donation and usage volumes
+    
+    Requires: can_view_analytics permission
+    """
+    try:
+        from app.models.blood_collection import BloodCollection
+        from app.models.blood_usage import BloodUsage
+        from sqlalchemy import func
+        
+        # Calculate date range
+        end_date = datetime.utcnow().date()
+        start_date = end_date - timedelta(days=days)
+        
+        # Get daily total donations
+        daily_donations = db.query(
+            func.date(BloodCollection.donation_date).label('date'),
+            func.sum(BloodCollection.collection_volume_ml).label('total_donated')
+        ).filter(
+            BloodCollection.donation_date >= start_date,
+            BloodCollection.donation_date <= end_date
+        ).group_by(func.date(BloodCollection.donation_date)).all()
+        
+        # Get daily total usage
+        daily_usage = db.query(
+            func.date(BloodUsage.usage_date).label('date'),
+            func.sum(BloodUsage.volume_given_out).label('total_used')
+        ).filter(
+            BloodUsage.usage_date >= start_date,
+            BloodUsage.usage_date <= end_date
+        ).group_by(func.date(BloodUsage.usage_date)).all()
+        
+        # Create date series
+        date_series = []
+        current_date = start_date
+        while current_date <= end_date:
+            date_series.append(current_date)
+            current_date += timedelta(days=1)
+        
+        # Convert to dictionaries for easy lookup
+        donations_dict = {d.date: float(d.total_donated or 0) for d in daily_donations}
+        usage_dict = {d.date: float(d.total_used or 0) for d in daily_usage}
+        
+        # Build daily totals
+        daily_data = []
+        
+        for date in date_series:
+            daily_donated = donations_dict.get(date, 0)
+            daily_used = usage_dict.get(date, 0)
+            
+            daily_data.append({
+                "date": date.isoformat(),
+                "daily_donated": daily_donated,
+                "daily_used": daily_used
+            })
+        
+        return {
+            "period": {
+                "start_date": start_date.isoformat(),
+                "end_date": end_date.isoformat(),
+                "days": days
+            },
+            "daily_data": daily_data
+        }
+        
+    except Exception as e:
+        logger.error(f"Error getting daily total volume: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get daily total volume: {str(e)}"
+        )
+
 # ==================== CSV UPLOAD ENDPOINTS ====================
 
 @router.post("/collections/upload-csv", status_code=status.HTTP_201_CREATED)
