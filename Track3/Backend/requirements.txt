@@ -20,6 +20,9 @@ pydantic[email]
 httpx
 requests
 
+# Data Processing
+pandas
+
 # Development & Testing
 pytest
 pytest-asyncio

@@ -1,7 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime, timedelta
+import pandas as pd
+import io
 
 from app.db.database import get_db
 from app.core.auth import get_current_user, require_permission
@@ -201,42 +203,6 @@ def get_expiry_alerts(
         "expiring_units": alerts
     }
 
-# ==================== ANALYTICS AND REPORTING ====================
-
-@router.get("/analytics/dashboard")
-def get_inventory_analytics(
-    days_back: int = Query(30, ge=1, le=365, description="Number of days to include in analytics"),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(require_permission("can_view_analytics"))
-):
-    """
-    Get comprehensive inventory analytics for dashboard
-    
-    Requires: can_view_analytics permission
-    """
-    service = BloodBankService(db)
-    analytics = service.get_inventory_analytics(days_back)
-    
-    # Add summary metrics
-    current_inventory = analytics["current_inventory"]
-    total_current_volume = sum(inv["current_volume_ml"] for inv in current_inventory)
-    
-    analytics["summary"] = {
-        "timestamp": datetime.utcnow(),
-        "total_current_volume_ml": total_current_volume,
-        "blood_groups_tracked": len(current_inventory),
-        "period_collections": {
-            "total_volume_ml": sum(col["total_volume_ml"] for col in analytics["collections"]),
-            "total_units": sum(col["total_units"] for col in analytics["collections"])
-        },
-        "period_usage": {
-            "total_volume_ml": sum(usage["total_volume_ml"] for usage in analytics["usage"]),
-            "total_units": sum(usage["total_units"] for usage in analytics["usage"])
-        }
-    }
-    
-    return analytics
-
 # ==================== DHIS2 INTEGRATION ====================
 
 @router.post("/sync/dhis2", response_model=DHIS2SyncResponse)
@@ -322,3 +288,216 @@ def get_system_status(
             "database_connected": False,
             "error": str(e)
         }
+
+# ==================== CSV UPLOAD ENDPOINTS ====================
+
+@router.post("/collections/upload-csv", status_code=status.HTTP_201_CREATED)
+async def upload_collections_csv(
+    file: UploadFile = File(..., description="CSV file with blood collection data"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("can_manage_donors"))
+):
+    """
+    Upload blood collection data from CSV file
+    
+    Expected CSV columns:
+    - donor_age (required): Age of donor (18-70)
+    - donor_gender (required): M or F
+    - donor_occupation (optional): Donor's occupation
+    - blood_type (required): A+, A-, B+, B-, AB+, AB-, O+, O-
+    - collection_site (required): Collection site name
+    - donation_date (required): Date in YYYY-MM-DD format
+    - expiry_date (required): Date in YYYY-MM-DD format
+    - collection_volume_ml (required): Volume in ml (1-500)
+    - hemoglobin_g_dl (required): Hemoglobin level (1-20)
+    
+    Requires: can_manage_donors permission
+    """
+    try:
+        # Validate file type
+        if not file.filename.endswith('.csv'):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File must be a CSV file"
+            )
+        
+        # Read CSV content
+        content = await file.read()
+        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
+        
+        # Validate required columns
+        required_columns = [
+            'donor_age', 'donor_gender', 'blood_type', 'collection_site',
+            'donation_date', 'expiry_date', 'collection_volume_ml', 'hemoglobin_g_dl'
+        ]
+        
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Missing required columns: {', '.join(missing_columns)}"
+            )
+        
+        # Clean and validate data
+        service = BloodBankService(db)
+        successful_uploads = 0
+        failed_uploads = []
+        
+        logger.info(f"Processing {len(df)} collection records from CSV")
+        
+        for index, row in df.iterrows():
+            try:
+                # Skip rows with missing critical data
+                if pd.isna(row['donor_age']) or pd.isna(row['donor_gender']) or pd.isna(row['blood_type']):
+                    failed_uploads.append(f"Row {index + 1}: Missing critical data")
+                    continue
+                
+                # Create collection data
+                collection_data = BloodCollectionCreate(
+                    donor_age=int(row['donor_age']),
+                    donor_gender=str(row['donor_gender']).upper(),
+                    donor_occupation=str(row.get('donor_occupation', 'Unknown')),
+                    blood_type=str(row['blood_type']),
+                    collection_site=str(row['collection_site']),
+                    donation_date=pd.to_datetime(row['donation_date']).date(),
+                    expiry_date=pd.to_datetime(row['expiry_date']).date(),
+                    collection_volume_ml=float(row['collection_volume_ml']),
+                    hemoglobin_g_dl=float(row['hemoglobin_g_dl'])
+                )
+                
+                # Create collection record
+                collection = service.create_collection(collection_data, current_user.user_id)
+                successful_uploads += 1
+                
+            except Exception as e:
+                failed_uploads.append(f"Row {index + 1}: {str(e)}")
+        
+        return {
+            "message": f"CSV upload completed",
+            "total_records": len(df),
+            "successful_uploads": successful_uploads,
+            "failed_uploads": len(failed_uploads),
+            "failures": failed_uploads[:10],  # Show first 10 failures
+            "has_more_failures": len(failed_uploads) > 10
+        }
+        
+    except pd.errors.EmptyDataError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="CSV file is empty"
+        )
+    except pd.errors.ParserError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error parsing CSV file: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Error uploading collections CSV: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process CSV file: {str(e)}"
+        )
+
+@router.post("/usage/upload-csv", status_code=status.HTTP_201_CREATED)
+async def upload_usage_csv(
+    file: UploadFile = File(..., description="CSV file with blood usage data"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("can_manage_inventory"))
+):
+    """
+    Upload blood usage data from CSV file
+    
+    Expected CSV columns:
+    - purpose (required): Purpose of blood usage (string)
+    - department (required): Department name
+    - blood_group (required): A+, A-, B+, B-, AB+, AB-, O+, O-
+    - volume_given_out (required): Volume in ml (1-500)
+    - usage_date (required): Date in YYYY-MM-DD format
+    - individual_name (optional): Patient name
+    - patient_location (required): Hospital/location name
+    
+    Requires: can_manage_inventory permission
+    """
+    try:
+        # Validate file type
+        if not file.filename.endswith('.csv'):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="File must be a CSV file"
+            )
+        
+        # Read CSV content
+        content = await file.read()
+        df = pd.read_csv(io.StringIO(content.decode('utf-8')))
+        
+        # Validate required columns
+        required_columns = [
+            'purpose', 'department', 'blood_group', 'volume_given_out',
+            'usage_date', 'patient_location'
+        ]
+        
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Missing required columns: {', '.join(missing_columns)}"
+            )
+        
+        # Clean and validate data
+        service = BloodBankService(db)
+        successful_uploads = 0
+        failed_uploads = []
+        
+        logger.info(f"Processing {len(df)} usage records from CSV")
+        
+        for index, row in df.iterrows():
+            try:
+                # Skip rows with missing critical data
+                if (pd.isna(row['purpose']) or pd.isna(row['department']) or 
+                    pd.isna(row['blood_group']) or pd.isna(row['volume_given_out'])):
+                    failed_uploads.append(f"Row {index + 1}: Missing critical data")
+                    continue
+                
+                # Create usage data
+                usage_data = BloodUsageCreate(
+                    purpose=str(row['purpose']),
+                    department=str(row['department']),
+                    blood_group=str(row['blood_group']),
+                    volume_given_out=float(row['volume_given_out']),
+                    usage_date=pd.to_datetime(row['usage_date']).date(),
+                    individual_name=str(row.get('individual_name', 'Unknown Patient')),
+                    patient_location=str(row['patient_location'])
+                )
+                
+                # Create usage record
+                usage = service.create_usage(usage_data, current_user.user_id)
+                successful_uploads += 1
+                
+            except Exception as e:
+                failed_uploads.append(f"Row {index + 1}: {str(e)}")
+        
+        return {
+            "message": f"CSV upload completed",
+            "total_records": len(df),
+            "successful_uploads": successful_uploads,
+            "failed_uploads": len(failed_uploads),
+            "failures": failed_uploads[:10],  # Show first 10 failures
+            "has_more_failures": len(failed_uploads) > 10
+        }
+        
+    except pd.errors.EmptyDataError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="CSV file is empty"
+        )
+    except pd.errors.ParserError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error parsing CSV file: {str(e)}"
+        )
+    except Exception as e:
+        logger.error(f"Error uploading usage CSV: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process CSV file: {str(e)}"
+        )
