@@ -16,10 +16,10 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     
     # Database
-    POSTGRES_SERVER: str = "dpg-d24j80f5r7bs73a68s40-a.oregon-postgres.render.com"
-    POSTGRES_USER: str = "blood_bank_system_user"
-    POSTGRES_PASSWORD: str = "1ztEjzCXwJCwJrndkyGcpcyJ2VM5WosZ"
-    POSTGRES_DB: str = "blood_bank_system"
+    POSTGRES_SERVER: str = "dpg-d257s4c9c44c73b9valg-a.oregon-postgres.render.com"
+    POSTGRES_USER: str = "blood_bank_system_5f0v_user"
+    POSTGRES_PASSWORD: str = "CKb66TEscgU1z4qwUszOVn4SXrTzUFLn"
+    POSTGRES_DB: str = "blood_bank_system_5f0v"
     POSTGRES_PORT: int = 5432
     
     @property

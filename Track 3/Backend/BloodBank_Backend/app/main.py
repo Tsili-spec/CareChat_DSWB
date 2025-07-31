@@ -1,14 +1,13 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.auth import router as auth_router
 from app.api.blood_bank import router as blood_bank_router
 from app.db.database import Base, engine, check_database_health
-from app.core.auth import get_current_user
 from app.models.user import User
-from app.models.blood_donation import BloodDonation
+from app.models.blood_collection import BloodCollection
 from app.models.blood_usage import BloodUsage
-from app.models.blood_inventory import BloodInventory, BloodInventoryTransaction
+from app.models.blood_stock import BloodStock
 import logging
 
 # Configure logging
@@ -22,14 +21,28 @@ try:
 except Exception as e:
     logger.error(f"Error creating database tables: {e}")
 
-# Create FastAPI app
+# Create FastAPI app with organized tags
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="AI-Enhanced Blood Bank Stock Monitoring and Forecasting System",
+    description="AI-Enhanced Blood Bank Stock Monitoring and Forecasting System - 3-Table Architecture",
     docs_url="/docs",
     redoc_url="/redoc",
-    openapi_url="/openapi.json"
+    openapi_url="/openapi.json",
+    openapi_tags=[
+        {
+            "name": "Authentication",
+            "description": "User authentication and authorization endpoints"
+        },
+        {
+            "name": "Blood Bank Management", 
+            "description": "Blood collection, usage, and stock management endpoints"
+        },
+        {
+            "name": "System",
+            "description": "System health and status monitoring endpoints"
+        }
+    ]
 )
 
 # Configure CORS
@@ -41,47 +54,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth_router, prefix=settings.API_V1_STR)
-app.include_router(blood_bank_router, prefix=settings.API_V1_STR)
+# Include routers with proper tags
+app.include_router(auth_router, prefix=settings.API_V1_STR, tags=["Authentication"])
+app.include_router(blood_bank_router, prefix=settings.API_V1_STR, tags=["Blood Bank Management"])
 
-@app.get("/")
+@app.get("/", tags=["System"])
 def read_root():
-    """Root endpoint"""
+    """Root endpoint - Welcome message"""
     return {
         "message": "Welcome to Blood Bank Management System API",
         "version": settings.VERSION,
+        "architecture": "3-Table Blood Bank System (Collections, Usage, Stock)",
         "docs": "/docs",
         "redoc": "/redoc"
     }
 
-@app.get("/health")
+@app.get("/health", tags=["System"])
 async def health_check():
-    """Health check endpoint"""
+    """Health check endpoint - System and database status"""
     db_healthy = await check_database_health()
     
     return {
         "status": "healthy" if db_healthy else "unhealthy",
         "database": "connected" if db_healthy else "disconnected",
-        "version": settings.VERSION
+        "version": settings.VERSION,
+        "schema": "blood_collections, blood_usage, blood_stock, users"
     }
 
-@app.get("/protected")
-def protected_route(current_user: User = Depends(get_current_user)):
-    """Example protected route"""
-    return {
-        "message": f"Hello {current_user.full_name}",
-        "user_id": current_user.id,
-        "username": current_user.username,
-        "role": current_user.role,
-        "department": current_user.department
-    }
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=settings.DEBUG
-    )
+
+
