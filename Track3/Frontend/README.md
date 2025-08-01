@@ -2,6 +2,10 @@
 Frontend deployed using Vercel where a CI/CD pipeline was implemented a change in the root directory( and new commit) triggers a build. Use the link below
 
 link : https://care-chat-dswb.vercel.app/
+# Logins
+username: frank
+password: Frank123
+Role: Admin
 
 # React + TypeScript + Vite
 
