@@ -69,41 +69,6 @@
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
-/* Password wrapper and toggle styles */
-.password-wrapper {
-  position: relative;
-}
-
-.password-toggle {
-  position: absolute;
-  right: 16px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: all 0.2s ease;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.password-toggle:hover {
-  background: rgba(59, 130, 246, 0.1);
-  transform: scale(1.1);
-}
-
-.password-toggle:focus {
-  outline: 2px solid rgba(59, 130, 246, 0.5);
-  outline-offset: 2px;
-}
-
-.password-wrapper .login-input {
-  padding-right: 48px;
-}
-
 .role-select {
   cursor: pointer;
   -webkit-appearance: none;
