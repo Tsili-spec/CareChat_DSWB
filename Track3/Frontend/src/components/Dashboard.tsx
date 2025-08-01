@@ -71,6 +71,7 @@ const Dashboard: React.FC = () => {
     window.location.href = '/dashboard';
   };
 
+
   const getTimeToExpiryPercentage = (nearExpiry: number, total: number): number => {
     if (total === 0) return 0;
     return Math.round(((total - nearExpiry) / total) * 100);
@@ -101,19 +102,22 @@ const Dashboard: React.FC = () => {
       {/* Sidebar */}
       <div className="sidebar">
         <div className="sidebar-header">
-          <div className="logo">
+          <div className="logo" onClick={navigateToDashboard} style={{ cursor: 'pointer' }} title="Dashboard Home">
             🏠
           </div>
         </div>
         
         <div className="sidebar-menu">
-          <div className="menu-item" onClick={navigateToAddSample}>
+          <div className="menu-item" onClick={navigateToAddSample} title="Add Sample">
             <span className="menu-icon">+</span>
           </div>
-          <div className="menu-item" onClick={navigateToBloodUsage}>
+          <div className="menu-item" onClick={navigateToBloodUsage} title="Blood Usage">
             <span className="menu-icon">🩸</span>
           </div>
-          <div className="menu-item" onClick={navigateToForecasting}>
+          <div className="menu-item active" onClick={navigateToDashboard} title="Dashboard">
+            <span className="menu-icon">🏠</span>
+          </div>
+          <div className="menu-item" onClick={navigateToForecasting} title="Forecasting">
             <span className="menu-icon">📊</span>
           </div>
         </div>
