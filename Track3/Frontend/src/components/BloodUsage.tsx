@@ -267,9 +267,10 @@ const BloodUsage: React.FC = () => {
                     <input
                       type="text"
                       name="patient_id"
-                      placeholder="Patient ID"
+                      placeholder="Patient ID *"
                       value={formData.patient_id}
                       onChange={handleInputChange}
+                      required
                       className="form-input"
                     />
                   </div>
@@ -281,9 +282,10 @@ const BloodUsage: React.FC = () => {
                     <input
                       type="text"
                       name="patient_name"
-                      placeholder="Patient Name"
+                      placeholder="Patient Name *"
                       value={formData.patient_name}
                       onChange={handleInputChange}
+                      required
                       className="form-input"
                     />
                   </div>

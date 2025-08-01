@@ -15,7 +15,6 @@ const Login: React.FC = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -23,10 +22,6 @@ const Login: React.FC = () => {
       ...prev,
       [name]: value
     }));
-  };
-
-  const togglePasswordVisibility = () => {
-    setShowPassword(prev => !prev);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,10 +90,10 @@ const Login: React.FC = () => {
           </div>
 
           <div className="input-group">
-            <div className="input-wrapper password-wrapper">
+            <div className="input-wrapper">
               <span className="input-icon">🔒</span>
               <input
-                type={showPassword ? "text" : "password"}
+                type="password"
                 name="password"
                 placeholder="Password"
                 value={formData.password}
@@ -106,14 +101,6 @@ const Login: React.FC = () => {
                 required
                 className="login-input"
               />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={togglePasswordVisibility}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? "👁️" : "🙈"}
-              </button>
             </div>
           </div>
 
