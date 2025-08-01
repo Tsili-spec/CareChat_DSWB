@@ -1,50 +1,54 @@
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './components/Login'
-import Signup from './components/Signup'
-import DashboardLayout from './components/DashboardLayout'
-import ProtectedRoute from './components/ProtectedRoute'
-import PublicRoute from './components/PublicRoute'
+import Dashboard from './components/Dashboard'
+import AddSample from './components/AddSample'
+import BloodUsage from './components/BloodUsage'
+import './App.css'
+
+// Check if user is authenticated
+const isAuthenticated = () => {
+  return localStorage.getItem('authToken') !== null;
+}
+
+// Protected Route Component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  return isAuthenticated() ? <>{children}</> : <Navigate to="/" replace />;
+}
 
 function App() {
-  const navigate = useNavigate()
-
   return (
-    <Routes>
-      {/* Public routes - only accessible when not authenticated */}
-      <Route 
-        path="/login" 
-        element={
-          <PublicRoute>
-            <Login onSwitchToSignup={() => navigate('/signup')} />
-          </PublicRoute>
-        } 
-      />
-      <Route 
-        path="/signup" 
-        element={
-          <PublicRoute>
-            <Signup onSwitchToLogin={() => navigate('/login')} />
-          </PublicRoute>
-        } 
-      />
-
-      {/* Protected routes - only accessible when authenticated */}
-      <Route 
-        path="/dashboard" 
-        element={
-          <ProtectedRoute>
-            <DashboardLayout />
-          </ProtectedRoute>
-        } 
-      />
-
-      {/* Redirect root to dashboard */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
-      {/* Catch all route - redirect to dashboard */}
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
-    </Routes>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/add-sample" 
+            element={
+              <ProtectedRoute>
+                <AddSample />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/blood-usage" 
+            element={
+              <ProtectedRoute>
+                <BloodUsage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </Router>
   )
 }
 

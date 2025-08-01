@@ -1,96 +1,156 @@
-import React, { useState } from 'react'
-import { useAuth } from '../providers/AuthProvider'
-import './Auth.css'
+import React, { useState } from 'react';
+import './Login.css';
 
-interface LoginProps {
-  onSwitchToSignup: () => void
+interface LoginFormData {
+  username: string;
+  password: string;
+  role: string;
 }
 
-const Login: React.FC<LoginProps> = ({ onSwitchToSignup }) => {
-  const [formData, setFormData] = useState({
+const Login: React.FC = () => {
+  const [formData, setFormData] = useState<LoginFormData>({
     username: '',
     password: '',
-  })
-  const [error, setError] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const { login } = useAuth()
+    role: 'staff'
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    })
-  }
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(prev => !prev);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
 
     try {
-      await login(formData.username, formData.password)
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.')
+      const response = await fetch('https://blood-management-system-xplx.onrender.com/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Login failed');
+      }
+
+      const data = await response.json();
+      
+      // Store token and user data
+      localStorage.setItem('authToken', data.access_token);
+      localStorage.setItem('refreshToken', data.refresh_token);
+      localStorage.setItem('userData', JSON.stringify({
+        user_id: data.user_id,
+        username: data.username,
+        role: data.role,
+        permissions: data.permissions
+      }));
+
+      // Redirect to dashboard
+      console.log('Login successful:', data);
+      window.location.href = '/dashboard';
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(error instanceof Error ? error.message : 'Login failed');
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <div className="blood-icon">🩸</div>
-          <h1>Blood Bank Management System</h1>
-          <h2>Welcome Back</h2>
-          <p>Sign in to your account to continue</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="auth-form">
-          {error && <div className="error-message">{error}</div>}
-          
-          <div className="form-group">
-            <label htmlFor="username">Username</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              placeholder="Enter your username"
-            />
+    <div className="login-container">
+      <div className="login-card">
+        <form onSubmit={handleSubmit} className="login-form">
+          <div className="input-group">
+            <div className="input-wrapper">
+              <span className="input-icon">👤</span>
+              <input
+                type="text"
+                name="username"
+                placeholder="Name or Email"
+                value={formData.username}
+                onChange={handleInputChange}
+                required
+                className="login-input"
+              />
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              placeholder="Enter your password"
-            />
+          <div className="input-group">
+            <div className="input-wrapper password-wrapper">
+              <span className="input-icon">🔒</span>
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+                className="login-input"
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={togglePasswordVisibility}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "👁️" : "🙈"}
+              </button>
+            </div>
           </div>
 
-          <button type="submit" className="auth-button" disabled={isLoading}>
-            {isLoading ? 'Signing In...' : 'Sign In'}
+          <div className="input-group">
+            <div className="input-wrapper">
+              <span className="input-icon">👥</span>
+              <select
+                name="role"
+                value={formData.role}
+                onChange={handleInputChange}
+                className="login-input role-select"
+              >
+                <option value="admin">Admin</option>
+                <option value="manager">Manager</option>
+                <option value="staff">Staff</option>
+                <option value="viewer">Viewer</option>
+              </select>
+            </div>
+          </div>
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          <button 
+            type="submit" 
+            className="login-button"
+            disabled={isLoading}
+          >
+            {isLoading ? 'LOGGING IN...' : 'LOGIN'}
           </button>
         </form>
-
-        <div className="auth-footer">
-          <p>
-            Don't have an account?{' '}
-            <button type="button" onClick={onSwitchToSignup} className="link-button">
-              Sign up here
-            </button>
-          </p>
-        </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
