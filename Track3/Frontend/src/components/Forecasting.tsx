@@ -40,12 +40,28 @@ interface TrendsResponse {
   };
 }
 
+interface DailyData {
+  date: string;
+  daily_donated: number;
+  daily_used: number;
+}
+
+interface TotalVolumeResponse {
+  period: {
+    start_date: string;
+    end_date: string;
+    days: number;
+  };
+  daily_data: DailyData[];
+}
+
 const Forecasting: React.FC = () => {
   const [volumeData, setVolumeData] = useState<VolumeResponse | null>(null);
   const [trendsData, setTrendsData] = useState<TrendsResponse | null>(null);
+  const [totalVolumeData, setTotalVolumeData] = useState<TotalVolumeResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [currentView, setCurrentView] = useState<'welcome' | 'monitoring' | 'trends'>('welcome');
+  const [currentView, setCurrentView] = useState<'welcome' | 'monitoring' | 'trends' | 'trendAnalysis'>('welcome');
   const [selectedBloodTypes, setSelectedBloodTypes] = useState<string[]>(['A+', 'B+', 'AB+', 'O+']);
   const [days, setDays] = useState(90);
 
@@ -54,6 +70,8 @@ const Forecasting: React.FC = () => {
       fetchVolumeData();
     } else if (currentView === 'trends') {
       fetchTrendsData();
+    } else if (currentView === 'trendAnalysis') {
+      fetchTotalVolumeData();
     }
   }, [currentView, selectedBloodTypes, days]);
 
@@ -122,6 +140,38 @@ const Forecasting: React.FC = () => {
     }
   };
 
+  const fetchTotalVolumeData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(
+        `https://blood-management-system-xplx.onrender.com/api/v1/blood-bank/analytics/daily-total-volume?days=${days}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch total volume data');
+      }
+
+      const data = await response.json();
+      setTotalVolumeData(data);
+    } catch (error) {
+      console.error('Error fetching total volume data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load total volume data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
@@ -149,8 +199,276 @@ const Forecasting: React.FC = () => {
     setCurrentView('trends');
   };
 
+  const showTrendAnalysisView = () => {
+    setCurrentView('trendAnalysis');
+  };
+
   const showWelcomeView = () => {
     setCurrentView('welcome');
+  };
+
+  const renderTrendAnalysisView = () => {
+    if (!totalVolumeData || !totalVolumeData.daily_data) return null;
+    
+    const dailyData = totalVolumeData.daily_data;
+    const chartWidth = 800;
+    const chartHeight = 600;
+    const padding = { top: 40, right: 60, bottom: 80, left: 80 };
+    const plotWidth = chartWidth - padding.left - padding.right;
+    const plotHeight = chartHeight - padding.top - padding.bottom;
+    
+    // Find min and max values for scaling
+    const allVolumes = dailyData.flatMap(d => [d.daily_donated, d.daily_used]);
+    const maxVolume = Math.max(...allVolumes);
+    const minVolume = Math.min(...allVolumes);
+    const volumeRange = maxVolume - minVolume;
+    const yScale = (value: number) => padding.top + plotHeight - ((value - minVolume) / volumeRange) * plotHeight;
+    
+    // X-axis scaling
+    const xScale = (index: number) => padding.left + (index / (dailyData.length - 1)) * plotWidth;
+    
+    // Create path data for donated blood line
+    const donatedPath = dailyData.map((data, index) => {
+      const x = xScale(index);
+      const y = yScale(data.daily_donated);
+      return index === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
+    }).join(' ');
+    
+    // Create path data for used blood line
+    const usedPath = dailyData.map((data, index) => {
+      const x = xScale(index);
+      const y = yScale(data.daily_used);
+      return index === 0 ? `M ${x} ${y}` : `L ${x} ${y}`;
+    }).join(' ');
+    
+    // Generate y-axis ticks
+    const yTicks = [];
+    const tickCount = 8;
+    for (let i = 0; i <= tickCount; i++) {
+      const value = minVolume + (volumeRange * i / tickCount);
+      yTicks.push(value);
+    }
+    
+    // Generate x-axis date labels (show every 7th day for readability)
+    const dateLabels = dailyData.filter((_, index) => index % 7 === 0).map((data, index) => ({
+      x: xScale(index * 7),
+      date: new Date(data.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    }));
+    
+    return (
+      <div className="trend-analysis-view">
+        <div className="chart-header">
+          <button className="back-button" onClick={() => setCurrentView('welcome')}>
+            ← Back to Overview
+          </button>
+          <div className="header-content">
+            <h2>Trend Analysis - Daily Blood Volume</h2>
+            <p>Analyze patterns in blood donation and usage over time</p>
+          </div>
+        </div>
+        
+        {/* Time Period Filter */}
+        <div className="trends-controls">
+          <div className="control-group">
+            <label>Time Period:</label>
+            <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
+              <option value={30}>Last 30 days</option>
+              <option value={90}>Last 90 days</option>
+              <option value={180}>Last 180 days</option>
+              <option value={365}>Last 365 days</option>
+            </select>
+          </div>
+        </div>
+        
+        {loading ? (
+          <div className="chart-loading">
+            <div className="loading-spinner"></div>
+            <p>Loading trend analysis data...</p>
+          </div>
+        ) : error ? (
+          <div className="chart-error">
+            <p>Error: {error}</p>
+            <button onClick={fetchTotalVolumeData} className="retry-btn">Retry</button>
+          </div>
+        ) : totalVolumeData ? (
+          <>
+            <div className="chart-container" style={{ overflowX: 'auto', overflowY: 'auto', maxWidth: '100%', padding: '20px' }}>
+              <svg 
+                width={chartWidth} 
+                height={chartHeight} 
+                viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+                className="line-chart" 
+                style={{ minWidth: '800px', maxWidth: '100%' }}
+                preserveAspectRatio="xMidYMid meet"
+              >
+                {/* Background */}
+                <rect width={chartWidth} height={chartHeight} fill="#fafafa" />
+                
+                {/* Grid lines */}
+                {yTicks.map(tick => (
+                  <g key={tick}>
+                    <line
+                      x1={padding.left}
+                      y1={yScale(tick)}
+                      x2={padding.left + plotWidth}
+                      y2={yScale(tick)}
+                      stroke="#e5e5e5"
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={padding.left - 10}
+                      y={yScale(tick) + 4}
+                      textAnchor="end"
+                      fontSize="12"
+                      fill="#666"
+                    >
+                      {Math.round(tick)}
+                    </text>
+                  </g>
+                ))}
+                
+                {/* Vertical grid lines */}
+                {dateLabels.map(label => (
+                  <line
+                    key={label.date}
+                    x1={label.x}
+                    y1={padding.top}
+                    x2={label.x}
+                    y2={padding.top + plotHeight}
+                    stroke="#e5e5e5"
+                    strokeWidth="1"
+                  />
+                ))}
+                
+                {/* Chart border */}
+                <rect
+                  x={padding.left}
+                  y={padding.top}
+                  width={plotWidth}
+                  height={plotHeight}
+                  fill="none"
+                  stroke="#333"
+                  strokeWidth="2"
+                />
+                
+                {/* Data lines */}
+                <path
+                  d={donatedPath}
+                  stroke="#10b981"
+                  strokeWidth="3"
+                  fill="none"
+                  className="donation-line"
+                />
+                <path
+                  d={usedPath}
+                  stroke="#ef4444"
+                  strokeWidth="3"
+                  fill="none"
+                  className="usage-line"
+                />
+                
+                {/* Data points */}
+                {dailyData.map((data, index) => (
+                  <g key={index}>
+                    <circle
+                      cx={xScale(index)}
+                      cy={yScale(data.daily_donated)}
+                      r="4"
+                      fill="#10b981"
+                      stroke="white"
+                      strokeWidth="2"
+                    />
+                    <circle
+                      cx={xScale(index)}
+                      cy={yScale(data.daily_used)}
+                      r="4"
+                      fill="#ef4444"
+                      stroke="white"
+                      strokeWidth="2"
+                    />
+                  </g>
+                ))}
+                
+                {/* X-axis labels */}
+                {dateLabels.map(label => (
+                  <text
+                    key={label.date}
+                    x={label.x}
+                    y={padding.top + plotHeight + 20}
+                    textAnchor="middle"
+                    fontSize="12"
+                    fill="#666"
+                  >
+                    {label.date}
+                  </text>
+                ))}
+                
+                {/* Axis labels */}
+                <text
+                  x={padding.left + plotWidth / 2}
+                  y={chartHeight - 20}
+                  textAnchor="middle"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="#333"
+                >
+                  Date
+                </text>
+                <text
+                  x={20}
+                  y={padding.top + plotHeight / 2}
+                  textAnchor="middle"
+                  fontSize="14"
+                  fontWeight="bold"
+                  fill="#333"
+                  transform={`rotate(-90 20 ${padding.top + plotHeight / 2})`}
+                >
+                  Volume (ml)
+                </text>
+                
+                {/* Legend */}
+                <g transform={`translate(${padding.left + plotWidth - 150}, ${padding.top + 20})`}>
+                  <rect x="0" y="0" width="140" height="60" fill="white" stroke="#ddd" strokeWidth="1" />
+                  <line x1="10" y1="20" x2="30" y2="20" stroke="#10b981" strokeWidth="3" />
+                  <text x="35" y="24" fontSize="12" fill="#333">Daily Donated</text>
+                  <line x1="10" y1="40" x2="30" y2="40" stroke="#ef4444" strokeWidth="3" />
+                  <text x="35" y="44" fontSize="12" fill="#333">Daily Used</text>
+                </g>
+              </svg>
+            </div>
+            
+            <div className="trend-summary">
+              <div className="summary-card">
+                <h3>Total Period</h3>
+                <p>
+                  <span className="metric-value">{totalVolumeData.period.days}</span> days
+                </p>
+              </div>
+              <div className="summary-card">
+                <h3>Total Donated</h3>
+                <p>
+                  <span className="metric-value">{totalVolumeData.daily_data.reduce((sum, d) => sum + d.daily_donated, 0).toLocaleString()}</span> ml
+                </p>
+              </div>
+              <div className="summary-card">
+                <h3>Total Used</h3>
+                <p>
+                  <span className="metric-value">{totalVolumeData.daily_data.reduce((sum, d) => sum + d.daily_used, 0).toLocaleString()}</span> ml
+                </p>
+              </div>
+              <div className="summary-card">
+                <h3>Net Balance</h3>
+                <p>
+                  <span className={`metric-value ${totalVolumeData.daily_data.reduce((sum, d) => sum + d.daily_donated, 0) - totalVolumeData.daily_data.reduce((sum, d) => sum + d.daily_used, 0) >= 0 ? 'positive' : 'negative'}`}>
+                    {(totalVolumeData.daily_data.reduce((sum, d) => sum + d.daily_donated, 0) - totalVolumeData.daily_data.reduce((sum, d) => sum + d.daily_used, 0)).toLocaleString()}
+                  </span> ml
+                </p>
+              </div>
+            </div>
+          </>
+        ) : null}
+      </div>
+    );
   };
 
   const formatNumber = (num: number): string => {
@@ -198,10 +516,13 @@ const Forecasting: React.FC = () => {
           <p>Forecast future needs and optimize ordering</p>
         </div>
         
-        <div className="feature-card">
+        <div className="feature-card clickable" onClick={showTrendAnalysisView}>
           <TrendingUp size={32} className="feature-icon" />
           <h3>Trend Analysis</h3>
           <p>Identify patterns and seasonal variations</p>
+          <div className="click-indicator">
+            <span>Click to view trend analysis →</span>
+          </div>
         </div>
       </div>
       
@@ -631,6 +952,7 @@ const Forecasting: React.FC = () => {
       <div className="main-content">
         {currentView === 'welcome' ? renderWelcomeView() : 
          currentView === 'monitoring' ? renderMonitoringView() : 
+         currentView === 'trendAnalysis' ? renderTrendAnalysisView() :
          renderTrendsView()}
       </div>
     </div>
