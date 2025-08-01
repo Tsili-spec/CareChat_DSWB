@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './components/Login'
 import Dashboard from './components/Dashboard'
+import AddSample from './components/AddSample'
+import BloodUsage from './components/BloodUsage'
 import './App.css'
 
 // Check if user is authenticated
@@ -24,6 +26,22 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/add-sample" 
+            element={
+              <ProtectedRoute>
+                <AddSample />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/blood-usage" 
+            element={
+              <ProtectedRoute>
+                <BloodUsage />
               </ProtectedRoute>
             } 
           />
