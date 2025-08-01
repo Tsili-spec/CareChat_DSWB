@@ -21,17 +21,41 @@ interface VolumeResponse {
   blood_types: BloodTypeVolume[];
 }
 
+interface BloodTypeTrend {
+  dates: string[];
+  donated_volume: number[];
+  used_volume: number[];
+  stock_volume: number[];
+}
+
+interface TrendsResponse {
+  period: {
+    start_date: string;
+    end_date: string;
+    days: number;
+  };
+  blood_types: string[];
+  trends: {
+    [bloodType: string]: BloodTypeTrend;
+  };
+}
+
 const Forecasting: React.FC = () => {
   const [volumeData, setVolumeData] = useState<VolumeResponse | null>(null);
+  const [trendsData, setTrendsData] = useState<TrendsResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [currentView, setCurrentView] = useState<'welcome' | 'monitoring'>('welcome');
+  const [currentView, setCurrentView] = useState<'welcome' | 'monitoring' | 'trends'>('welcome');
+  const [selectedBloodTypes, setSelectedBloodTypes] = useState<string[]>(['A+', 'B+', 'AB+', 'O+']);
+  const [days, setDays] = useState(90);
 
   useEffect(() => {
     if (currentView === 'monitoring') {
       fetchVolumeData();
+    } else if (currentView === 'trends') {
+      fetchTrendsData();
     }
-  }, [currentView]);
+  }, [currentView, selectedBloodTypes, days]);
 
   const fetchVolumeData = async () => {
     try {
@@ -65,6 +89,39 @@ const Forecasting: React.FC = () => {
     }
   };
 
+  const fetchTrendsData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const bloodTypesQuery = selectedBloodTypes.map(type => `blood_types=${encodeURIComponent(type)}`).join('&');
+      const response = await fetch(
+        `https://blood-management-system-xplx.onrender.com/api/v1/blood-bank/analytics/daily-volume-trends?days=${days}&${bloodTypesQuery}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch trends data');
+      }
+
+      const data = await response.json();
+      setTrendsData(data);
+    } catch (error) {
+      console.error('Error fetching trends data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load trends data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
@@ -88,6 +145,10 @@ const Forecasting: React.FC = () => {
     setCurrentView('monitoring');
   };
 
+  const showTrendsView = () => {
+    setCurrentView('trends');
+  };
+
   const showWelcomeView = () => {
     setCurrentView('welcome');
   };
@@ -106,17 +167,20 @@ const Forecasting: React.FC = () => {
     <div className="welcome-container">
       <div className="welcome-header">
         <TrendingUp size={48} className="welcome-icon" />
-        <h1 className="welcome-title">Welcome to Forecasting</h1>
+        <h1 className="welcome-title">Welcome to Analytics Menu</h1>
         <p className="welcome-subtitle">
           Advanced analytics and predictions for blood bank inventory management
         </p>
       </div>
       
       <div className="feature-grid">
-        <div className="feature-card">
+        <div className="feature-card clickable" onClick={showTrendsView}>
           <BarChart3 size={32} className="feature-icon" />
           <h3>Volume Analytics</h3>
           <p>Track donation and usage patterns by blood type</p>
+          <div className="click-indicator">
+            <span>Click to view trend charts →</span>
+          </div>
         </div>
         
         <div className="feature-card clickable" onClick={showMonitoringView}>
@@ -245,6 +309,292 @@ const Forecasting: React.FC = () => {
     </div>
   );
 
+  const renderTrendsView = () => {
+    const availableBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+    
+    const handleBloodTypeToggle = (bloodType: string) => {
+      setSelectedBloodTypes(prev => 
+        prev.includes(bloodType) 
+          ? prev.filter(type => type !== bloodType)
+          : [...prev, bloodType]
+      );
+    };
+
+    const getLineColor = (bloodType: string): string => {
+      const colors: { [key: string]: string } = {
+        'A+': '#ef4444', 'A-': '#f87171',
+        'B+': '#3b82f6', 'B-': '#60a5fa',
+        'AB+': '#10b981', 'AB-': '#34d399',
+        'O+': '#f59e0b', 'O-': '#fbbf24'
+      };
+      return colors[bloodType] || '#6b7280';
+    };
+
+    return (
+      <div className="monitoring-view">
+        <div className="monitoring-header">
+          <button className="back-button" onClick={showWelcomeView}>
+            ← Back to Overview
+          </button>
+          <div className="monitoring-title">
+            <BarChart3 size={32} className="monitoring-icon" />
+            <h1>Volume Trends Analysis</h1>
+          </div>
+        </div>
+
+        <div className="monitoring-content">
+          {/* Controls */}
+          <div className="trends-controls">
+            <div className="control-group">
+              <label>Time Period:</label>
+              <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
+                <option value={30}>Last 30 days</option>
+                <option value={90}>Last 90 days</option>
+                <option value={180}>Last 180 days</option>
+                <option value={365}>Last 365 days</option>
+              </select>
+            </div>
+            
+            <div className="control-group">
+              <label>Blood Types:</label>
+              <div className="blood-type-filters">
+                {availableBloodTypes.map(type => (
+                  <button
+                    key={type}
+                    className={`filter-btn ${selectedBloodTypes.includes(type) ? 'active' : ''}`}
+                    onClick={() => handleBloodTypeToggle(type)}
+                    style={{
+                      backgroundColor: selectedBloodTypes.includes(type) ? getLineColor(type) : '#f3f4f6',
+                      color: selectedBloodTypes.includes(type) ? 'white' : '#374151'
+                    }}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="chart-loading">
+              <div className="loading-spinner"></div>
+              <p>Loading trends data...</p>
+            </div>
+          ) : error ? (
+            <div className="chart-error">
+              <p>Error: {error}</p>
+              <button onClick={fetchTrendsData} className="retry-btn">Retry</button>
+            </div>
+          ) : trendsData ? (
+            <>
+              <div className="trends-chart-container">
+                <div className="chart-header">
+                  <h2>Daily Volume Trends - Donated Blood</h2>
+                  <p>Period: {trendsData.period.start_date} to {trendsData.period.end_date}</p>
+                </div>
+              
+              <div className="line-chart-container">
+                <svg className="line-chart" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+                  {/* Chart background and grid */}
+                  <defs>
+                    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+                    </pattern>
+                  </defs>
+                  <rect width="800" height="400" fill="url(#grid)" />
+                  
+                  {/* Y-axis */}
+                  <line x1="80" y1="50" x2="80" y2="350" stroke="#374151" strokeWidth="2" />
+                  {/* X-axis */}
+                  <line x1="80" y1="350" x2="750" y2="350" stroke="#374151" strokeWidth="2" />
+                  
+                  {/* Y-axis labels */}
+                  {[0, 1000, 2000, 3000, 4000, 5000].map((value, index) => (
+                    <g key={value}>
+                      <line x1="75" y1={350 - (index * 50)} x2="85" y2={350 - (index * 50)} stroke="#374151" strokeWidth="1" />
+                      <text x="70" y={355 - (index * 50)} textAnchor="end" fontSize="10" fill="#6b7280">
+                        {value > 0 ? `${value/1000}K` : '0'}
+                      </text>
+                    </g>
+                  ))}
+                  
+                  {/* Lines for each blood type */}
+                  {trendsData.blood_types.filter(type => selectedBloodTypes.includes(type)).map(bloodType => {
+                    const trend = trendsData.trends[bloodType];
+                    const maxValue = 5000; // Max scale for Y-axis
+                    const chartWidth = 670; // Available width for chart
+                    const chartHeight = 300; // Available height for chart
+                    
+                    const points = trend.dates.map((date, index) => {
+                      const x = 80 + (index / (trend.dates.length - 1)) * chartWidth;
+                      const y = 350 - (trend.donated_volume[index] / maxValue) * chartHeight;
+                      return `${x},${y}`;
+                    }).join(' ');
+                    
+                    return (
+                      <g key={bloodType}>
+                        <polyline
+                          points={points}
+                          fill="none"
+                          stroke={getLineColor(bloodType)}
+                          strokeWidth="2"
+                          strokeLinejoin="round"
+                        />
+                        {/* Data points */}
+                        {trend.dates.map((date, index) => {
+                          const x = 80 + (index / (trend.dates.length - 1)) * chartWidth;
+                          const y = 350 - (trend.donated_volume[index] / maxValue) * chartHeight;
+                          return (
+                            <circle
+                              key={index}
+                              cx={x}
+                              cy={y}
+                              r="2"
+                              fill={getLineColor(bloodType)}
+                            >
+                              <title>{`${bloodType} - ${date}: ${trend.donated_volume[index]}ml`}</title>
+                            </circle>
+                          );
+                        })}
+                      </g>
+                    );
+                  })}
+                  
+                  {/* Chart labels */}
+                  <text x="400" y="30" textAnchor="middle" fontSize="14" fontWeight="bold" fill="#1f2937">
+                    Daily Donated Volume by Blood Type
+                  </text>
+                  <text x="30" y="200" textAnchor="middle" fontSize="12" fontWeight="600" fill="#1f2937" transform="rotate(-90, 30, 200)">
+                    Volume (ml)
+                  </text>
+                  <text x="415" y="385" textAnchor="middle" fontSize="12" fontWeight="600" fill="#1f2937">
+                    Date
+                  </text>
+                </svg>
+              </div>
+
+              {/* Legend */}
+              <div className="chart-legend">
+                {selectedBloodTypes.map(bloodType => (
+                  <div key={bloodType} className="legend-item">
+                    <div 
+                      className="legend-box" 
+                      style={{ backgroundColor: getLineColor(bloodType) }}
+                    ></div>
+                    <span>{bloodType}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="trends-chart-container" style={{ marginTop: '3rem' }}>
+              <div className="chart-header">
+                <h2>Daily Volume Trends - Used Blood</h2>
+                <p>Period: {trendsData?.period.start_date} to {trendsData?.period.end_date}</p>
+              </div>
+              
+              <div className="line-chart-container">
+                <svg className="line-chart" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid meet">
+                  {/* Chart background and grid */}
+                  <defs>
+                    <pattern id="grid-usage" width="40" height="40" patternUnits="userSpaceOnUse">
+                      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e5e7eb" strokeWidth="1"/>
+                    </pattern>
+                  </defs>
+                  <rect width="800" height="400" fill="url(#grid-usage)" />
+                  
+                  {/* Y-axis */}
+                  <line x1="80" y1="50" x2="80" y2="350" stroke="#374151" strokeWidth="2" />
+                  {/* X-axis */}
+                  <line x1="80" y1="350" x2="750" y2="350" stroke="#374151" strokeWidth="2" />
+                  
+                  {/* Y-axis labels */}
+                  {[0, 1000, 2000, 3000, 4000, 5000].map((value, index) => (
+                    <g key={value}>
+                      <line x1="75" y1={350 - (index * 50)} x2="85" y2={350 - (index * 50)} stroke="#374151" strokeWidth="1" />
+                      <text x="70" y={355 - (index * 50)} textAnchor="end" fontSize="10" fill="#6b7280">
+                        {value > 0 ? `${value/1000}K` : '0'}
+                      </text>
+                    </g>
+                  ))}
+                  
+                  {/* Lines for each blood type - Usage Data */}
+                  {trendsData?.blood_types.filter(type => selectedBloodTypes.includes(type)).map(bloodType => {
+                    const trend = trendsData?.trends[bloodType];
+                    if (!trend) return null;
+                    
+                    const maxValue = 5000; // Max scale for Y-axis
+                    const chartWidth = 670; // Available width for chart
+                    const chartHeight = 300; // Available height for chart
+                    
+                    const points = trend.dates.map((_, index) => {
+                      const x = 80 + (index / (trend.dates.length - 1)) * chartWidth;
+                      const y = 350 - (trend.used_volume[index] / maxValue) * chartHeight;
+                      return `${x},${y}`;
+                    }).join(' ');
+                    
+                    return (
+                      <g key={bloodType}>
+                        <polyline
+                          points={points}
+                          fill="none"
+                          stroke={getLineColor(bloodType)}
+                          strokeWidth="2"
+                          strokeLinejoin="round"
+                        />
+                        {/* Data points */}
+                        {trend.dates.map((date, index) => {
+                          const x = 80 + (index / (trend.dates.length - 1)) * chartWidth;
+                          const y = 350 - (trend.used_volume[index] / maxValue) * chartHeight;
+                          return (
+                            <circle
+                              key={index}
+                              cx={x}
+                              cy={y}
+                              r="2"
+                              fill={getLineColor(bloodType)}
+                            >
+                              <title>{`${bloodType} - ${date}: ${trend.used_volume[index]}ml`}</title>
+                            </circle>
+                          );
+                        })}
+                      </g>
+                    );
+                  })}
+                  
+                  {/* Chart labels */}
+                  <text x="400" y="30" textAnchor="middle" fontSize="14" fontWeight="bold" fill="#1f2937">
+                    Daily Used Volume by Blood Type
+                  </text>
+                  <text x="30" y="200" textAnchor="middle" fontSize="12" fontWeight="600" fill="#1f2937" transform="rotate(-90, 30, 200)">
+                    Volume (ml)
+                  </text>
+                  <text x="415" y="385" textAnchor="middle" fontSize="12" fontWeight="600" fill="#1f2937">
+                    Date
+                  </text>
+                </svg>
+              </div>
+
+              {/* Legend for Usage Chart */}
+              <div className="chart-legend">
+                {selectedBloodTypes.map(bloodType => (
+                  <div key={bloodType} className="legend-item">
+                    <div 
+                      className="legend-box" 
+                      style={{ backgroundColor: getLineColor(bloodType) }}
+                    ></div>
+                    <span>{bloodType}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            </>
+          ) : null}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="forecasting-container">
       {/* Sidebar */}
@@ -279,7 +629,9 @@ const Forecasting: React.FC = () => {
 
       {/* Main Content */}
       <div className="main-content">
-        {currentView === 'welcome' ? renderWelcomeView() : renderMonitoringView()}
+        {currentView === 'welcome' ? renderWelcomeView() : 
+         currentView === 'monitoring' ? renderMonitoringView() : 
+         renderTrendsView()}
       </div>
     </div>
   );
