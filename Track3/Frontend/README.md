@@ -1,7 +1,7 @@
 # Deployment 
 Frontend deployed using Vercel where a CI/CD pipeline was implemented a change in the root directory( and new commit) triggers a build. Use the link below
 
-link : https://care-chat-dswb-7dt6gf4tp-tsili-specs-projects.vercel.app
+link : https://care-chat-dswb.vercel.app/
 
 # React + TypeScript + Vite
 
