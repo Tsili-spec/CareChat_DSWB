@@ -63,6 +63,10 @@ const Dashboard: React.FC = () => {
     window.location.href = '/blood-usage';
   };
 
+  const navigateToForecasting = () => {
+    window.location.href = '/forecasting';
+  };
+
   const navigateToDashboard = () => {
     window.location.href = '/dashboard';
   };
@@ -109,7 +113,7 @@ const Dashboard: React.FC = () => {
           <div className="menu-item" onClick={navigateToBloodUsage}>
             <span className="menu-icon">🩸</span>
           </div>
-          <div className="menu-item active" onClick={navigateToDashboard}>
+          <div className="menu-item" onClick={navigateToForecasting}>
             <span className="menu-icon">📊</span>
           </div>
         </div>

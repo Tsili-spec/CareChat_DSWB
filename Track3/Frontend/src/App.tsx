@@ -3,6 +3,7 @@ import Login from './components/Login'
 import Dashboard from './components/Dashboard'
 import AddSample from './components/AddSample'
 import BloodUsage from './components/BloodUsage'
+import Forecasting from './components/Forecasting'
 import './App.css'
 
 // Check if user is authenticated
@@ -42,6 +43,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <BloodUsage />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/forecasting" 
+            element={
+              <ProtectedRoute>
+                <Forecasting />
               </ProtectedRoute>
             } 
           />
