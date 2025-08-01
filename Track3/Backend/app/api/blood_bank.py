@@ -857,7 +857,7 @@ async def upload_usage_csv(
     - purpose (required): Purpose of blood usage (string)
     - department (required): Department name
     - blood_group (required): A+, A-, B+, B-, AB+, AB-, O+, O-
-    - volume_given_out (required): Volume in ml (1-500)
+    - volume_given_out (required): Volume in ml (1-10000, supports bulk usage)
     - usage_date (required): Date in YYYY-MM-DD format
     - individual_name (optional): Patient name
     - patient_location (required): Hospital/location name

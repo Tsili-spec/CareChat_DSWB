@@ -62,7 +62,7 @@ class BloodUsageBase(BaseModel):
     purpose: str = Field(..., max_length=100, description="Purpose of blood usage")
     department: str = Field(..., max_length=100)
     blood_group: BloodType
-    volume_given_out: float = Field(..., gt=0, le=500, description="Volume given out in ml")
+    volume_given_out: float = Field(..., gt=0, le=50000, description="Volume given out in ml (supports bulk usage)")
     usage_date: date
     individual_name: Optional[str] = Field(None, min_length=2, max_length=200, description="Name of individual blood was given to")
     patient_location: str = Field(..., max_length=200, description="Hospital name where patient is located")
@@ -74,7 +74,7 @@ class BloodUsageUpdate(BaseModel):
     purpose: Optional[str] = Field(None, max_length=100, description="Purpose of blood usage")
     department: Optional[str] = Field(None, max_length=100)
     blood_group: Optional[BloodType] = None
-    volume_given_out: Optional[float] = Field(None, gt=0, le=500, description="Volume given out in ml")
+    volume_given_out: Optional[float] = Field(None, gt=0, le=10000, description="Volume given out in ml (supports bulk usage)")
     usage_date: Optional[date] = None
     individual_name: Optional[str] = Field(None, min_length=2, max_length=200, description="Name of individual blood was given to")
     patient_location: Optional[str] = Field(None, max_length=200, description="Hospital name where patient is located")
