@@ -167,7 +167,7 @@ const Forecasting: React.FC = () => {
     <div className="welcome-container">
       <div className="welcome-header">
         <TrendingUp size={48} className="welcome-icon" />
-        <h1 className="welcome-title">Welcome to Analytics Menu</h1>
+        <h1 className="welcome-title">Welcome to Blood Bank Analytics</h1>
         <p className="welcome-subtitle">
           Advanced analytics and predictions for blood bank inventory management
         </p>
@@ -425,7 +425,7 @@ const Forecasting: React.FC = () => {
                     const chartWidth = 670; // Available width for chart
                     const chartHeight = 300; // Available height for chart
                     
-                    const points = trend.dates.map((date, index) => {
+                    const points = trend.dates.map((_, index) => {
                       const x = 80 + (index / (trend.dates.length - 1)) * chartWidth;
                       const y = 350 - (trend.donated_volume[index] / maxValue) * chartHeight;
                       return `${x},${y}`;
