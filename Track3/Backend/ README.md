@@ -5,7 +5,10 @@
 ### 📋 Overview
 
 The Blood Bank Management System implements a comprehensive JWT (JSON Web Token) based authentication system designed for healthcare environments. This system provides secure user management, role-based access control, and robust security features essential for medical data management.
-
+## Deployment
+Backend was deployed using render where CI/CD pipeline is done automatically any change triggers a build. link below
+link : https://blood-management-system-xplx.onrender.com/docs
+Note: server may need to restart when it has been idle for long.
 ### 🏗️ Authentication Architecture
 
 ```
