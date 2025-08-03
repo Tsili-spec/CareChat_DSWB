@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, validator, Field
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
+import uuid
 
 class UserRole(str, Enum):
     ADMIN = "admin"
@@ -81,7 +82,7 @@ class UserUpdate(BaseModel):
     can_view_analytics: Optional[bool] = None
 
 class UserResponse(UserBase):
-    user_id: str
+    user_id: uuid.UUID
     is_active: bool
     is_verified: bool
     last_login: Optional[datetime] = None

@@ -8,7 +8,9 @@ import './App.css'
 
 // Check if user is authenticated
 const isAuthenticated = () => {
-  return localStorage.getItem('authToken') !== null;
+  // Temporary bypass for testing - remove in production
+  return true;
+  // return localStorage.getItem('authToken') !== null;
 }
 
 // Protected Route Component

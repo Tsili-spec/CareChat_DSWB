@@ -25,6 +25,10 @@ pandas
 numpy
 scipy
 
+# Admin Interface
+fastapi-amis-admin[postgresql]
+asyncpg
+
 # Development & Testing
 pytest
 pytest-asyncio

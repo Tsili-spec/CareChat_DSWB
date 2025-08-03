@@ -117,3 +117,23 @@ class JWTManager:
     def get_token_expiry_time() -> int:
         """Get token expiration time in seconds"""
         return settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60
+
+    @staticmethod
+    def decode_token(token: str) -> Dict[str, Any]:
+        """
+        Simple decode method for admin middleware
+        
+        Args:
+            token: JWT token string
+            
+        Returns:
+            Decoded token payload
+            
+        Raises:
+            JWTError: If token is invalid or expired
+        """
+        return jwt.decode(
+            token, 
+            settings.JWT_SECRET_KEY, 
+            algorithms=[settings.ALGORITHM]
+        )

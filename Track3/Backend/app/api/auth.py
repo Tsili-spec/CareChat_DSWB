@@ -12,6 +12,7 @@ from app.core.auth import get_current_user, require_role
 from app.core.config import settings
 from app.core.security import SecurityUtils
 from typing import List
+import uuid
 
 router = APIRouter(prefix="/auth")
 
@@ -278,7 +279,7 @@ def list_users(
 
 @router.delete("/users/{user_id}")
 def delete_user(
-    user_id: str,
+    user_id: uuid.UUID,
     current_user: User = Depends(require_role("admin")),
     db: Session = Depends(get_db)
 ):

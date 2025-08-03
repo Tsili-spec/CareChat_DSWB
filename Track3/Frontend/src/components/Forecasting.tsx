@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TrendingUp, BarChart3, Activity, Calendar } from 'lucide-react';
 import './Forecasting.css';
+import './Dashboard.css';
 
 interface BloodTypeVolume {
   blood_type: string;
@@ -55,15 +56,48 @@ interface TotalVolumeResponse {
   daily_data: DailyData[];
 }
 
+interface UsageStatistics {
+  avg_daily_usage: number;
+  trend: number;
+  data_points: number;
+  variance: number;
+}
+
+interface BloodTypeRecommendation {
+  blood_type: string;
+  current_stock_ml: number;
+  forecasted_daily_demand_ml: number;
+  safety_stock_ml: number;
+  recommended_order_ml: number;
+  usage_statistics: UsageStatistics;
+}
+
+interface InventoryOptimizationResponse {
+  parameters: {
+    service_level: number;
+    service_level_percentage: number;
+    z_score: number;
+    lead_time_days: number;
+    max_order_limit: number;
+  };
+  blood_type_recommendations: BloodTypeRecommendation[];
+  timestamp: string;
+}
+
 const Forecasting: React.FC = () => {
   const [volumeData, setVolumeData] = useState<VolumeResponse | null>(null);
   const [trendsData, setTrendsData] = useState<TrendsResponse | null>(null);
   const [totalVolumeData, setTotalVolumeData] = useState<TotalVolumeResponse | null>(null);
+  const [inventoryData, setInventoryData] = useState<InventoryOptimizationResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [currentView, setCurrentView] = useState<'welcome' | 'monitoring' | 'trends' | 'trendAnalysis'>('welcome');
+  const [currentView, setCurrentView] = useState<'welcome' | 'monitoring' | 'trends' | 'trendAnalysis' | 'predictive'>('welcome');
   const [selectedBloodTypes, setSelectedBloodTypes] = useState<string[]>(['A+', 'B+', 'AB+', 'O+']);
   const [days, setDays] = useState(90);
+  const [forecastDays, setForecastDays] = useState(30);
+  const [serviceLevel, setServiceLevel] = useState(0.95);
+  const [leadTimeDays, setLeadTimeDays] = useState(14);
+  const [maxOrderLimit, setMaxOrderLimit] = useState(1000);
 
   useEffect(() => {
     if (currentView === 'monitoring') {
@@ -72,8 +106,17 @@ const Forecasting: React.FC = () => {
       fetchTrendsData();
     } else if (currentView === 'trendAnalysis') {
       fetchTotalVolumeData();
+    } else if (currentView === 'predictive') {
+      fetchInventoryOptimization();
     }
-  }, [currentView, selectedBloodTypes, days]);
+  }, [currentView, selectedBloodTypes, days, forecastDays, serviceLevel, leadTimeDays, maxOrderLimit]);
+
+  // Initial load effect for predictive view
+  useEffect(() => {
+    if (currentView === 'predictive' && !inventoryData) {
+      fetchInventoryOptimization();
+    }
+  }, [currentView]);
 
   const fetchVolumeData = async () => {
     try {
@@ -172,6 +215,38 @@ const Forecasting: React.FC = () => {
     }
   };
 
+  const fetchInventoryOptimization = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+
+      const response = await fetch(
+        `https://blood-management-system-xplx.onrender.com/api/v1/blood-bank/analytics/inventory-optimization?forecast_days=${forecastDays}&service_level=${serviceLevel}&lead_time_days=${leadTimeDays}&max_order_limit=${maxOrderLimit}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch inventory optimization data');
+      }
+
+      const data = await response.json();
+      setInventoryData(data);
+    } catch (error) {
+      console.error('Error fetching inventory optimization data:', error);
+      setError(error instanceof Error ? error.message : 'Failed to load inventory optimization data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
@@ -203,8 +278,415 @@ const Forecasting: React.FC = () => {
     setCurrentView('trendAnalysis');
   };
 
+  const showPredictiveView = () => {
+    setCurrentView('predictive');
+  };
+
   const showWelcomeView = () => {
     setCurrentView('welcome');
+  };
+
+  const renderPredictiveView = () => {
+    // Add debugging
+    console.log('renderPredictiveView called, inventoryData:', inventoryData);
+    console.log('loading:', loading, 'error:', error);
+    
+    return (
+      <div className="predictive-view">
+        {/* Header */}
+        <div className="predictive-header">
+          <button className="back-button" onClick={() => setCurrentView('welcome')}>
+            ← Back to Overview
+          </button>
+          <div className="header-content">
+            <h1>Inventory Optimization Dashboard</h1>
+          </div>
+        </div>
+
+        {/* API Parameters Controls */}
+        <div className="forecast-controls">
+          <h3>Optimization Parameters</h3>
+          
+          <div className="parameters-row">
+            <div className="parameter-group-inline">
+              <label>Forecast (days):</label>
+              <div className="inline-controls">
+                <button 
+                  className={`forecast-btn-small ${forecastDays === 7 ? 'active' : ''}`}
+                  onClick={() => setForecastDays(7)}
+                >
+                  7
+                </button>
+                <button 
+                  className={`forecast-btn-small ${forecastDays === 14 ? 'active' : ''}`}
+                  onClick={() => setForecastDays(14)}
+                >
+                  14
+                </button>
+                <button 
+                  className={`forecast-btn-small ${forecastDays === 30 ? 'active' : ''}`}
+                  onClick={() => setForecastDays(30)}
+                >
+                  30
+                </button>
+                <input 
+                  type="number" 
+                  value={forecastDays} 
+                  onChange={(e) => setForecastDays(Number(e.target.value))}
+                  min="7" 
+                  max="30"
+                  className="parameter-input-small"
+                />
+              </div>
+            </div>
+
+            <div className="parameter-group-inline">
+              <label>Service Level:</label>
+              <div className="inline-controls">
+                <button 
+                  className={`forecast-btn-small ${serviceLevel === 0.9 ? 'active' : ''}`}
+                  onClick={() => setServiceLevel(0.9)}
+                >
+                  90%
+                </button>
+                <button 
+                  className={`forecast-btn-small ${serviceLevel === 0.95 ? 'active' : ''}`}
+                  onClick={() => setServiceLevel(0.95)}
+                >
+                  95%
+                </button>
+                <button 
+                  className={`forecast-btn-small ${serviceLevel === 0.99 ? 'active' : ''}`}
+                  onClick={() => setServiceLevel(0.99)}
+                >
+                  99%
+                </button>
+                <input 
+                  type="number" 
+                  value={serviceLevel} 
+                  onChange={(e) => setServiceLevel(Number(e.target.value))}
+                  min="0.5" 
+                  max="0.99"
+                  step="0.01"
+                  className="parameter-input-small"
+                />
+              </div>
+            </div>
+
+            <div className="parameter-group-inline">
+              <label>Lead Time (days):</label>
+              <div className="inline-controls">
+                <button 
+                  className={`forecast-btn-small ${leadTimeDays === 1 ? 'active' : ''}`}
+                  onClick={() => setLeadTimeDays(1)}
+                >
+                  1
+                </button>
+                <button 
+                  className={`forecast-btn-small ${leadTimeDays === 7 ? 'active' : ''}`}
+                  onClick={() => setLeadTimeDays(7)}
+                >
+                  7
+                </button>
+                <button 
+                  className={`forecast-btn-small ${leadTimeDays === 14 ? 'active' : ''}`}
+                  onClick={() => setLeadTimeDays(14)}
+                >
+                  14
+                </button>
+                <input 
+                  type="number" 
+                  value={leadTimeDays} 
+                  onChange={(e) => setLeadTimeDays(Number(e.target.value))}
+                  min="1" 
+                  max="14"
+                  className="parameter-input-small"
+                />
+              </div>
+            </div>
+
+            <div className="parameter-group-inline">
+              <label>Max Order (ml):</label>
+              <div className="inline-controls">
+                <button 
+                  className={`forecast-btn-small ${maxOrderLimit === 500 ? 'active' : ''}`}
+                  onClick={() => setMaxOrderLimit(500)}
+                >
+                  500
+                </button>
+                <button 
+                  className={`forecast-btn-small ${maxOrderLimit === 1000 ? 'active' : ''}`}
+                  onClick={() => setMaxOrderLimit(1000)}
+                >
+                  1K
+                </button>
+                <button 
+                  className={`forecast-btn-small ${maxOrderLimit === 2000 ? 'active' : ''}`}
+                  onClick={() => setMaxOrderLimit(2000)}
+                >
+                  2K
+                </button>
+                <input 
+                  type="number" 
+                  value={maxOrderLimit} 
+                  onChange={(e) => setMaxOrderLimit(Number(e.target.value))}
+                  min="100" 
+                  max="10000"
+                  step="100"
+                  className="parameter-input-small"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="analysis-info-compact">
+            <div className="parameter-summary">
+              <span>Service Level: {(serviceLevel * 100).toFixed(0)}%</span>
+              <span>Lead Time: {leadTimeDays} days</span>
+              <span>Max Order: {maxOrderLimit.toLocaleString()} ml</span>
+              <span>Forecast: {forecastDays} days</span>
+            </div>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="chart-loading">
+            <div className="loading-spinner"></div>
+            <p>Loading inventory optimization data...</p>
+          </div>
+        ) : error ? (
+          <div className="chart-error">
+            <p>Error: {error}</p>
+            <button onClick={fetchInventoryOptimization} className="retry-btn">Retry</button>
+          </div>
+        ) : !inventoryData ? (
+          <div className="chart-loading">
+            <div className="loading-spinner"></div>
+            <p>No inventory data available. Loading...</p>
+            <button onClick={fetchInventoryOptimization} className="retry-btn">Load Data</button>
+          </div>
+        ) : (
+          <>
+            {/* Analysis Content */}
+            {(() => {
+              const recommendations = inventoryData.blood_type_recommendations;
+              
+              // Filter blood types that need orders
+              const criticalBloodTypes = recommendations.filter(
+                rec => rec.recommended_order_ml > 0
+              );
+
+              // Filter blood types with low stock (below safety level)
+              const lowStockBloodTypes = recommendations.filter(
+                rec => rec.current_stock_ml < rec.safety_stock_ml
+              );
+
+              // Calculate totals
+              const totalCurrentStock = recommendations.reduce(
+                (sum, rec) => sum + rec.current_stock_ml, 0
+              );
+
+              const totalRecommendedOrders = recommendations.reduce(
+                (sum, rec) => sum + rec.recommended_order_ml, 0
+              );
+
+              const totalForecastedDemand = recommendations.reduce(
+                (sum, rec) => sum + (rec.forecasted_daily_demand_ml * forecastDays), 0
+              );
+
+              // Calculate total estimated cost (assuming 0.85 frs per ml)
+              const totalEstimatedCost = totalRecommendedOrders * 0.85;
+
+              // Get critical blood types for display
+              const criticalBloodTypesText = criticalBloodTypes.length > 0 
+                ? criticalBloodTypes.map(r => r.blood_type).join(', ')
+                : 'None';
+
+              const getStatusColor = (recommendedOrder: number) => {
+                if (recommendedOrder > 0) return 'text-red-600';
+                return 'text-green-600';
+              };
+
+              const getStatusText = (rec: BloodTypeRecommendation) => {
+                if (rec.recommended_order_ml > 0) return 'Order Required';
+                if (rec.current_stock_ml < rec.safety_stock_ml) return 'Low Stock';
+                return 'Adequate';
+              };
+
+              const getJustification = (rec: BloodTypeRecommendation) => {
+                if (rec.recommended_order_ml > 0) {
+                  const daysOfStock = rec.current_stock_ml / rec.forecasted_daily_demand_ml;
+                  return `Current stock will last ${daysOfStock.toFixed(1)} days. Below safety level.`;
+                }
+                if (rec.current_stock_ml < rec.safety_stock_ml) {
+                  return `Stock below safety threshold but demand is low.`;
+                }
+                return `Stock levels are adequate for current demand patterns.`;
+              };
+
+              return (
+                <>
+                  {/* Overview Section */}
+                  <div className="overview-section">
+                    <div className="overview-header">
+                      <div className="overview-icon">⚠️</div>
+                      <h2>Overview</h2>
+                    </div>
+                    
+                    <div className="overview-cards">
+                      <div className="overview-card">
+                        <h3>Overall Stock Status</h3>
+                        <div className="status-value">
+                          {criticalBloodTypes.length > 0 ? 'Critical' : 'Good'}
+                        </div>
+                        <div className="status-detail">
+                          Critical types: {criticalBloodTypesText}
+                        </div>
+                      </div>
+
+                      <div className="overview-card">
+                        <h3>Low Stock Alert</h3>
+                        <div className="status-subtitle">
+                          Below safety stock levels
+                        </div>
+                        <div className="status-detail">
+                          {lowStockBloodTypes.length > 0 
+                            ? lowStockBloodTypes.map(r => r.blood_type).join(', ')
+                            : 'None'
+                          }
+                        </div>
+                      </div>
+
+                      <div className="overview-card">
+                        <h3>Total Current Stock</h3>
+                        <div className="status-subtitle">
+                          All blood types combined
+                        </div>
+                        <div className="status-detail">
+                          {Math.round(totalCurrentStock).toLocaleString()} ml
+                        </div>
+                      </div>
+
+                      <div className="overview-card">
+                        <h3>Recommended Order Cost</h3>
+                        <div className="status-subtitle">
+                          Total estimated cost ({Math.round(totalRecommendedOrders).toLocaleString()} ml)
+                        </div>
+                        <div className="cost-amount">
+                          Est. cost: {totalEstimatedCost.toLocaleString()} frs
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Suggested Replenishment Orders Table */}
+                  <div className="replenishment-section">
+                    <h2>Blood Type Analysis & Recommendations</h2>
+                    
+                    <div className="table-container">
+                      <table className="replenishment-table">
+                        <thead>
+                          <tr>
+                            <th>Blood Type</th>
+                            <th>Current Stock (ml)</th>
+                            <th>Safety Level (ml)</th>
+                            <th>Daily Demand (ml)</th>
+                            <th>{forecastDays}-Day Forecast (ml)</th>
+                            <th>Recommended Order (ml)</th>
+                            <th>Status</th>
+                            <th>Analysis</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {recommendations.map((rec) => (
+                            <tr key={rec.blood_type}>
+                              <td className="blood-type-cell">
+                                <span className="blood-type-badge">{rec.blood_type}</span>
+                              </td>
+                              <td>{Math.round(rec.current_stock_ml).toLocaleString()}</td>
+                              <td>{Math.round(rec.safety_stock_ml).toLocaleString()}</td>
+                              <td>{Math.round(rec.forecasted_daily_demand_ml).toLocaleString()}</td>
+                              <td>{Math.round(rec.forecasted_daily_demand_ml * forecastDays).toLocaleString()}</td>
+                              <td>
+                                <span className={`order-quantity ${getStatusColor(rec.recommended_order_ml)}`}>
+                                  {Math.round(rec.recommended_order_ml).toLocaleString()}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={getStatusColor(rec.recommended_order_ml)}>
+                                  {getStatusText(rec)}
+                                </span>
+                              </td>
+                              <td className="justification-cell">
+                                {getJustification(rec)}
+                                <br />
+                                <small>Trend: {rec.usage_statistics.trend > 0 ? '+' : ''}{rec.usage_statistics.trend.toFixed(1)} ml/day</small>
+                              </td>
+                              <td className="actions-cell">
+                                {rec.recommended_order_ml > 0 ? (
+                                  <div className="action-buttons">
+                                    <button className="action-btn create-order">
+                                      [Create Order]
+                                    </button>
+                                    <button className="action-btn ignore">
+                                      [Ignore]
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="no-action">No action needed</span>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Summary Statistics */}
+                  <div className="summary-section">
+                    <h2>Forecast Summary</h2>
+                    <div className="summary-stats">
+                      <div className="stat-item">
+                        <span className="stat-label">Analysis Timestamp:</span>
+                        <span className="stat-value">{new Date(inventoryData.timestamp).toLocaleString()}</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">Total Current Stock:</span>
+                        <span className="stat-value">{Math.round(totalCurrentStock).toLocaleString()} ml</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">Total {forecastDays}-Day Demand:</span>
+                        <span className="stat-value">{Math.round(totalForecastedDemand).toLocaleString()} ml</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">Total Recommended Orders:</span>
+                        <span className="stat-value">{Math.round(totalRecommendedOrders).toLocaleString()} ml</span>
+                      </div>
+                      <div className="stat-item">
+                        <span className="stat-label">Blood Types Needing Orders:</span>
+                        <span className="stat-value">{criticalBloodTypes.length} of {recommendations.length}</span>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const formatNumber = (num: number): string => {
+    if (num >= 1000000) {
+      return `${(num / 1000000).toFixed(1)}M`;
+    }
+    if (num >= 1000) {
+      return `${(num / 1000).toFixed(1)}K`;
+    }
+    return Math.round(num).toString();
   };
 
   const renderTrendAnalysisView = () => {
@@ -471,16 +953,6 @@ const Forecasting: React.FC = () => {
     );
   };
 
-  const formatNumber = (num: number): string => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`;
-    }
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`;
-    }
-    return Math.round(num).toString();
-  };
-
   const renderWelcomeView = () => (
     <div className="welcome-container">
       <div className="welcome-header">
@@ -510,10 +982,13 @@ const Forecasting: React.FC = () => {
           </div>
         </div>
         
-        <div className="feature-card">
+        <div className="feature-card clickable" onClick={showPredictiveView}>
           <Calendar size={32} className="feature-icon" />
           <h3>Predictive Insights</h3>
           <p>Forecast future needs and optimize ordering</p>
+          <div className="click-indicator">
+            <span>Click to view inventory optimization →</span>
+          </div>
         </div>
         
         <div className="feature-card clickable" onClick={showTrendAnalysisView}>
@@ -749,7 +1224,7 @@ const Forecasting: React.FC = () => {
                     const points = trend.dates.map((_, index) => {
                       const x = 80 + (index / (trend.dates.length - 1)) * chartWidth;
                       const y = 350 - (trend.donated_volume[index] / maxValue) * chartHeight;
-                      return `${x},${y}`;
+                        return `${x},${y}`;
                     }).join(' ');
                     
                     return (
@@ -953,6 +1428,7 @@ const Forecasting: React.FC = () => {
         {currentView === 'welcome' ? renderWelcomeView() : 
          currentView === 'monitoring' ? renderMonitoringView() : 
          currentView === 'trendAnalysis' ? renderTrendAnalysisView() :
+         currentView === 'predictive' ? renderPredictiveView() :
          renderTrendsView()}
       </div>
     </div>
