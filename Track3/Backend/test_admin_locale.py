@@ -16,10 +16,10 @@ def test_admin_interface():
     """Test the admin interface with English headers"""
     
     # For local development
-    # base_url = "http://localhost:8001"
+    base_url = "http://localhost:8001"
 
     # For Render deployment
-    base_url = "https://bloodbank.onrender.com"
+    # base_url = "https://bloodbank.onrender.com"
     
     # Test basic health
     try:

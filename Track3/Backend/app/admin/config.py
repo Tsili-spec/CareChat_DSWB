@@ -212,8 +212,11 @@ async def admin_logout_api(request: Request):
 def configure_admin(app: FastAPI):
     """Configure FastAPI-Amis-Admin interface with authentication"""
     
-    # Mount admin static files
-    app.mount("/static", StaticFiles(directory="static"), name="static")
+    # Mount admin static files (only if directory exists and has content)
+    import os
+    static_dir = "static"
+    if os.path.exists(static_dir) and os.listdir(static_dir):
+        app.mount("/static", StaticFiles(directory=static_dir), name="static")
     
     # Admin settings for PostgreSQL with explicit English localization
     admin_settings = Settings(
