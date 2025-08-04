@@ -5,7 +5,7 @@ import whisper
 import torch
 
 class WhisperEngine:
-    def __init__(self, model_name="large"):
+    def __init__(self, model_name="small"):
         print(f"Loading Whisper model: {model_name}")
         self.model = whisper.load_model(model_name)
         print("✅ Whisper model loaded successfully")
