@@ -158,7 +158,7 @@ class MultiLLMService:
             
             # Create chat completion with fixed model
             completion = self.groq_client.chat.completions.create(
-                model="gemma2-9b-it",
+                model="gemma2-9b-it", # Use a fixed model for Groq
                 messages=[
                     {
                         "role": "user",
