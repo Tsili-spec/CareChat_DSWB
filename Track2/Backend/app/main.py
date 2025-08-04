@@ -3,7 +3,7 @@
 
 from fastapi import FastAPI
 
-from app.api import chatbot, feedback, patient
+from app.api import chatbot, feedback, patient, transcription
 from app.core.jwt_auth import create_access_token, verify_token
 from app.db.database import create_tables, check_database_connection
 from app.services.llm_service import llm_service
@@ -42,3 +42,4 @@ async def llm_health():
 app.include_router(chatbot.router)
 app.include_router(feedback.router)
 app.include_router(patient.router, prefix="/api", tags=["Patient"])
+app.include_router(transcription.router, prefix="/api", tags=["Transcription"])

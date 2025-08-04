@@ -74,10 +74,8 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
         self.admin_site = admin_site
         
     async def dispatch(self, request: Request, call_next):
-        # Skip authentication for login page, API endpoints, static files, and non-admin routes
+        # Skip authentication for login page, static files, and non-admin routes
         if (request.url.path.startswith('/admin/login') or 
-            request.url.path.startswith('/admin/api/login') or
-            request.url.path.startswith('/admin/logout') or
             request.url.path.startswith('/static') or
             not request.url.path.startswith('/admin')):
             return await call_next(request)
@@ -92,25 +90,18 @@ class AdminAuthMiddleware(BaseHTTPMiddleware):
             payload = JWTManager.decode_token(admin_token)
             user_id = payload.get('sub')
             if not user_id:
-                print(f"DEBUG: No user_id in payload: {payload}")
                 return RedirectResponse(url='/admin/login', status_code=302)
                 
             # Check if user exists and is admin
             db = next(get_db())
             user = db.query(User).filter(User.user_id == user_id).first()
-            if not user:
-                print(f"DEBUG: User not found for ID: {user_id}")
-                return RedirectResponse(url='/admin/login', status_code=302)
-            if user.role not in ['admin', 'manager']:
-                print(f"DEBUG: User role not allowed: {user.role}")
+            if not user or user.role not in ['admin', 'manager']:
                 return RedirectResponse(url='/admin/login', status_code=302)
                 
             # Add user to request state
             request.state.current_user = user
-            print(f"DEBUG: User authenticated successfully: {user.username} ({user.role})")
             
-        except Exception as e:
-            print(f"DEBUG: JWT verification failed: {e}")
+        except Exception:
             return RedirectResponse(url='/admin/login', status_code=302)
             
         return await call_next(request)
@@ -212,11 +203,8 @@ async def admin_logout_api(request: Request):
 def configure_admin(app: FastAPI):
     """Configure FastAPI-Amis-Admin interface with authentication"""
     
-    # Mount admin static files (only if directory exists and has content)
-    import os
-    static_dir = "static"
-    if os.path.exists(static_dir) and os.listdir(static_dir):
-        app.mount("/static", StaticFiles(directory=static_dir), name="static")
+    # Mount admin static files
+    app.mount("/static", StaticFiles(directory="static"), name="static")
     
     # Admin settings for PostgreSQL with explicit English localization
     admin_settings = Settings(
@@ -537,24 +525,7 @@ def configure_admin(app: FastAPI):
     # Add authentication middleware
     app.add_middleware(AdminAuthMiddleware, admin_site=site)
     
-    # Add admin authentication routes to the main app BEFORE mounting
-    @app.get("/admin/login")
-    async def admin_login_page():
-        """Serve admin login page"""
-        login_page = create_admin_login_page()
-        return login_page.amis_json()
-    
-    @app.post("/admin/api/login")
-    async def admin_login_endpoint(request: Request):
-        """Handle admin login"""
-        return await admin_login_api(request)
-    
-    @app.post("/admin/logout")
-    async def admin_logout_endpoint(request: Request):
-        """Handle admin logout"""
-        return await admin_logout_api(request)
-    
-    # Mount admin to the app AFTER adding routes
+    # Mount admin to the app
     site.mount_app(app)
     
     return site

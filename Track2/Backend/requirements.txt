@@ -27,6 +27,13 @@ pandas
 numpy
 scikit-learn
 
+# Audio Transcription
+openai-whisper
+torch
+torchvision
+torchaudio
+pydub
+
 # Environment & Configuration
 python-dotenv
 pydantic
