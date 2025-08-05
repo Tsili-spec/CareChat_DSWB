@@ -4,6 +4,9 @@ from app.schemas.reminder import ReminderCreate
 from datetime import datetime
 from uuid import UUID
 from typing import List, Optional
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 class ReminderService:
     
@@ -31,6 +34,11 @@ class ReminderService:
         db.add(db_reminder)
         db.commit()
         db.refresh(db_reminder)
+        
+        # Log reminder creation for SMS scheduling
+        logger.info(f"New reminder created for patient {patient.full_name}: {db_reminder.title}")
+        logger.info(f"Scheduled for: {reminder_data.days} at {[t.strftime('%H:%M') for t in reminder_data.scheduled_time]}")
+        
         return db_reminder
     
     @staticmethod

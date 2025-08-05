@@ -1,1 +1,21 @@
 .env
+
+# Log files - contain sensitive information
+logs/*.log
+logs/*.log.*
+*.log
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Upload directory - may contain sensitive files
+upload/

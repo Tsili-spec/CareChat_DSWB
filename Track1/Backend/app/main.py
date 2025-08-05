@@ -6,8 +6,11 @@ from app.core.logging_config import setup_logging, get_logger
 from app.api import feedback, reminder, patient, dashboard
 
 from app.db.database import Base, engine
+from app.services.sms_service import sms_service
+from app.services.reminder_scheduler import reminder_scheduler
 import time
 import os
+import asyncio
 
 # Create logs directory if it doesn't exist
 if not os.path.exists("logs"):
@@ -24,9 +27,40 @@ logger.info("Database tables created.")
 
 app = FastAPI(
     title="CareChat API",
-    description="API for patient reminders and feedback system.",
+    description="API for patient reminders and feedback system with SMS notifications.",
     version="1.0.0"
 )
+
+# SMS Service startup event
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on application startup"""
+    logger.info("🚀 Starting CareChat API...")
+    
+    # Check SMS service configuration
+    if sms_service.is_configured():
+        logger.info("✅ SMS service configured successfully")
+        logger.info(f"   Twilio Account: {sms_service.account_sid[:10]}...")
+        logger.info(f"   Twilio Number: {sms_service.twilio_number}")
+    else:
+        logger.warning("⚠️  SMS service not configured - check environment variables")
+        logger.warning("   Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER")
+    
+    # Note: Scheduler is started manually via API endpoint for better control
+    logger.info("📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)")
+    logger.info("🎉 CareChat API startup complete!")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup on application shutdown"""
+    logger.info("🛑 Shutting down CareChat API...")
+    
+    # Stop reminder scheduler if running
+    if reminder_scheduler.is_running:
+        reminder_scheduler.stop_scheduler()
+        logger.info("📅 Reminder scheduler stopped")
+    
+    logger.info("👋 CareChat API shutdown complete!")
 
 # Logging Middleware
 @app.middleware("http")
