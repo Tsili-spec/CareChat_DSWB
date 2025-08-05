@@ -89,8 +89,7 @@ class PatientService:
         
         # Create patient record
         db_patient = PatientModel(
-            first_name=patient_data.first_name,
-            last_name=patient_data.last_name,
+            full_name=patient_data.full_name,
             phone_number=patient_data.phone_number,
             email=patient_data.email,
             preferred_language=patient_data.preferred_language or "en",
@@ -153,8 +152,7 @@ class PatientService:
         # Patient info (excluding sensitive data)
         patient_info = {
             "patient_id": str(patient.patient_id),
-            "first_name": patient.first_name,
-            "last_name": patient.last_name,
+            "full_name": patient.full_name,
             "phone_number": patient.phone_number,
             "email": patient.email,
             "preferred_language": patient.preferred_language,
