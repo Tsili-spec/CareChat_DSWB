@@ -31,8 +31,7 @@ def signup(patient: PatientCreate, db: Session = Depends(get_db)):
     **Example request:**
     ```json
     {
-        "first_name": "John",
-        "last_name": "Doe",
+        "full_name": "John Doe",
         "phone_number": "+237123456789",
         "email": "john.doe@example.com",
         "preferred_language": "en",
@@ -88,8 +87,7 @@ def login(login_data: PatientLogin, db: Session = Depends(get_db)):
         "expires_in": 1800,
         "patient": {
             "patient_id": "123e4567-e89b-12d3-a456-426614174000",
-            "first_name": "John",
-            "last_name": "Doe",
+            "full_name": "John Doe",
             "phone_number": "+237123456789",
             "email": "john.doe@example.com",
             "preferred_language": "en"

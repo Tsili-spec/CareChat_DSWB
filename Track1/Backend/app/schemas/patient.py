@@ -4,17 +4,11 @@ from typing import Optional
 from datetime import datetime
 
 class PatientBase(BaseModel):
-    first_name: str = Field(
+    full_name: str = Field(
         min_length=1,
-        max_length=100,
-        description="Patient's first name",
-        examples=["John"]
-    )
-    last_name: str = Field(
-        min_length=0,
-        max_length=100,
-        description="Patient's last name",
-        examples=["Doe"]
+        max_length=200,
+        description="Patient's full name",
+        examples=["John Doe"]
     )
     phone_number: str = Field(
         min_length=8,
@@ -39,7 +33,7 @@ class PatientCreate(PatientBase):
     Schema for creating a new patient account.
     
     **Required fields:**
-    - first_name, last_name: Patient's full name
+    - full_name: Patient's complete name
     - phone_number: Used as unique identifier for login
     - password: Minimum 6 characters for security
     
@@ -89,8 +83,7 @@ class PatientResponse(PatientBase):
         "json_schema_extra": {
             "example": {
                 "patient_id": "123e4567-e89b-12d3-a456-426614174000",
-                "first_name": "John",
-                "last_name": "Doe", 
+                "full_name": "John Doe",
                 "phone_number": "+237123456789",
                 "email": "john.doe@example.com",
                 "preferred_language": "en",
