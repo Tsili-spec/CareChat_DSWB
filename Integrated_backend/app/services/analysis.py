@@ -52,7 +52,7 @@ class TopicAnalyzer:
             "wait_time": ["wait", "delay", "queue", "slow", "time"],
             "staff_attitude": ["rude", "impolite", "shout", "disrespect", "unfriendly", "care", 
                              "attitude", "behavior", "manner", "treatment", "service", "doctor", "nurse"],
-            "medication": ["drug", "pill", "prescription", "medication", "dose", "tablet", "medicine", 
+            "medication": ["drug", "pill","pills", "prescription", "medication","medications", "dose", "tablet", "medicine", 
                          "treatment", "pharmacy", "prescribe"],
             "cost": ["expensive", "bill", "cost", "money", "price", "payment", "charge", "fee", "afford", 
                     "insurance", "financial"]
