@@ -2,10 +2,12 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.logging_config import setup_logging, get_logger
-from app.api import feedback, reminder, patient, dashboard
+from app.api import feedback, reminder, patient, dashboard, chatbot
 from app.db.database import connect_to_mongo, close_mongo_connection
 from app.services.sms_service import sms_service
 from app.services.reminder_scheduler import reminder_scheduler
+from app.services.llm_service import llm_service
+from app.services.rag_service import rag_service
 import time
 import os
 import asyncio
@@ -32,6 +34,19 @@ async def lifespan(app: FastAPI):
     # Connect to MongoDB
     await connect_to_mongo()
     logger.info("✅ Database initialization completed")
+    
+    # Initialize LLM service and RAG
+    try:
+        logger.info("🤖 Initializing LLM service...")
+        await llm_service.initialize()
+        logger.info("✅ LLM service initialized successfully")
+        
+        logger.info("🧠 Initializing RAG service...")
+        await rag_service.initialize()
+        logger.info("✅ RAG service initialized successfully")
+    except Exception as e:
+        logger.warning(f"⚠️  LLM/RAG service initialization failed: {e}")
+        logger.warning("   Chat features may not work properly")
     
     # Check SMS service configuration
     if sms_service.is_configured():
@@ -105,10 +120,18 @@ def root():
     **Response:** Welcome message with available services
     """
     return {
-        "message": "Welcome to CareChat API! Available services: Feedback, Reminder, Patient Management.",
+        "message": "Welcome to CareChat API! Available services: Feedback, Reminder, Patient Management, AI Chat.",
         "version": settings.VERSION,
         "docs": "/docs",
-        "redoc": "/redoc"
+        "redoc": "/redoc",
+        "endpoints": {
+            "chat": "/api/chat/",
+            "feedback": "/api/feedback/",
+            "reminders": "/api/reminder/",
+            "patients": "/api/patient/",
+            "health": "/health",
+            "llm_health": "/health/llm"
+        }
     }
 
 @app.get("/health",
@@ -127,6 +150,17 @@ def health_check():
         "timestamp": time.time()
     }
 
+@app.get("/health/llm",
+         summary="LLM service health check",
+         description="Check LLM service health status")
+async def llm_health():
+    """
+    LLM service health check endpoint.
+    
+    **Response:** Health status of all LLM providers
+    """
+    return llm_service.get_health_status()
+
 # CORS Configuration
 app.add_middleware(
     CORSMiddleware,
@@ -141,6 +175,7 @@ app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
 app.include_router(reminder.router, prefix="/api", tags=["Reminder"])
 app.include_router(patient.router, prefix="/api", tags=["Patient"])
 app.include_router(dashboard.router, prefix="/api", tags=["Dashboard"])
+app.include_router(chatbot.router, prefix="/api", tags=["Chat"])
 
 if __name__ == "__main__":
     import uvicorn

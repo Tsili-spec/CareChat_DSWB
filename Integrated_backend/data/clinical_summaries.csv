@@ -1,0 +1,6 @@
+diagnosis,summary_text,body_temp_c,blood_pressure_systolic,heart_rate,patient_age,patient_gender
+Hypertension,"Patient presents with elevated blood pressure, headaches, and dizziness",36.8,150,85,45,male
+Type 2 Diabetes,"Patient reports increased thirst, frequent urination, and fatigue",37.0,135,78,52,female
+Common Cold,"Patient has runny nose, sore throat, and mild cough",37.2,120,72,28,female
+Gastroenteritis,"Patient experiencing nausea, vomiting, and abdominal pain",38.1,110,88,35,male
+Migraine,Severe headache with sensitivity to light and sound,36.9,125,75,30,female
