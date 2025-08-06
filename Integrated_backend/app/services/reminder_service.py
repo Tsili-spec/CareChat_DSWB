@@ -26,7 +26,7 @@ class ReminderService:
             )
             
             await reminder.insert()
-            logger.info(f"Reminder created successfully with ID: {reminder.reminder_id}")
+            logger.info(f"Reminder created successfully with ID: {reminder.id}")
             return reminder
             
         except Exception as e:
@@ -36,7 +36,11 @@ class ReminderService:
     @staticmethod
     async def get_reminder_by_id(reminder_id: str) -> Optional[ReminderModel]:
         """Get reminder by ID"""
-        return await ReminderModel.find_one({"reminder_id": reminder_id})
+        try:
+            from bson import ObjectId
+            return await ReminderModel.get(ObjectId(reminder_id))
+        except Exception:
+            return None
     
     @staticmethod
     async def get_patient_reminders(patient_id: str) -> List[ReminderModel]:
@@ -75,7 +79,7 @@ class ReminderService:
             # Get patient information
             patient = await PatientService.get_patient_by_id(reminder.patient_id)
             if not patient:
-                logger.error(f"Patient not found for reminder {reminder.reminder_id}")
+                logger.error(f"Patient not found for reminder {reminder.id}")
                 return {
                     "success": False,
                     "message": "Patient not found"
@@ -90,14 +94,14 @@ class ReminderService:
             
             # Record delivery attempt
             delivery_record = ReminderDeliveryModel(
-                reminder_id=reminder.reminder_id,
+                reminder_id=str(reminder.id),
                 sent_at=datetime.utcnow(),
                 delivery_status=result["delivery_status"],
                 provider_response=result.get("provider_response", "")
             )
             await delivery_record.insert()
             
-            logger.info(f"Reminder notification sent for reminder {reminder.reminder_id}")
+            logger.info(f"Reminder notification sent for reminder {reminder.id}")
             return result
             
         except Exception as e:

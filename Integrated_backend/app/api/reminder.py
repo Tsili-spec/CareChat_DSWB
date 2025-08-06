@@ -39,7 +39,7 @@ async def create_reminder(reminder_data: ReminderCreate):
         reminder = await ReminderService.create_reminder(reminder_data)
         
         return Reminder(
-            reminder_id=reminder.reminder_id,
+            reminder_id=str(reminder.id),
             patient_id=reminder.patient_id,
             title=reminder.title,
             message=reminder.message,
@@ -80,7 +80,7 @@ async def get_reminder(reminder_id: str):
         )
     
     return Reminder(
-        reminder_id=reminder.reminder_id,
+        reminder_id=str(reminder.id),
         patient_id=reminder.patient_id,
         title=reminder.title,
         message=reminder.message,
@@ -108,7 +108,7 @@ async def get_patient_reminders(patient_id: str):
         
         return [
             Reminder(
-                reminder_id=reminder.reminder_id,
+                reminder_id=str(reminder.id),
                 patient_id=reminder.patient_id,
                 title=reminder.title,
                 message=reminder.message,
@@ -143,7 +143,7 @@ async def list_reminders():
         
         return [
             Reminder(
-                reminder_id=reminder.reminder_id,
+                reminder_id=str(reminder.id),
                 patient_id=reminder.patient_id,
                 title=reminder.title,
                 message=reminder.message,
@@ -188,7 +188,7 @@ async def update_reminder_status(reminder_id: str, status: str):
         )
     
     return Reminder(
-        reminder_id=reminder.reminder_id,
+        reminder_id=str(reminder.id),
         patient_id=reminder.patient_id,
         title=reminder.title,
         message=reminder.message,
@@ -276,7 +276,7 @@ async def get_reminder_deliveries(reminder_id: str):
         
         return [
             ReminderDelivery(
-                delivery_id=delivery.delivery_id,
+                delivery_id=str(delivery.id),
                 reminder_id=delivery.reminder_id,
                 delivery_status=delivery.delivery_status,
                 provider_response=delivery.provider_response,

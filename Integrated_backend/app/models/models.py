@@ -64,7 +64,6 @@ class Feedback(Document):
 class Reminder(Document):
     """Reminder model for MongoDB using Beanie ODM"""
     
-    reminder_id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
     patient_id: str = Field(...)
     title: str = Field(..., max_length=200)
     message: str = Field(...)
@@ -85,7 +84,6 @@ class Reminder(Document):
 class ReminderDelivery(Document):
     """Reminder delivery tracking model for MongoDB using Beanie ODM"""
     
-    delivery_id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
     reminder_id: str = Field(...)
     sent_at: datetime = Field(default_factory=datetime.utcnow)
     delivery_status: str = Field(...)
