@@ -20,6 +20,10 @@ pydantic[email]
 # Translation service
 textblob
 
+# NLP and ML for advanced analysis
+spacy
+scikit-learn
+
 # Other utilities
 python-dotenv
 
@@ -42,6 +46,5 @@ bcrypt
 alembic
 
 numpy
-ffmpeg
 
 

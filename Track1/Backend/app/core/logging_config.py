@@ -42,6 +42,11 @@ def setup_logging():
     logging.getLogger("uvicorn").setLevel(logging.WARNING)
     logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
     logging.getLogger("passlib").setLevel(logging.WARNING)
+    
+    # SECURITY: Disable Twilio client logging to prevent credential exposure
+    logging.getLogger("twilio.http_client").setLevel(logging.ERROR)
+    logging.getLogger("twilio.base.http").setLevel(logging.ERROR)
+    logging.getLogger("twilio.rest").setLevel(logging.ERROR)
 
     logging.info("Logging configured successfully.")
 
