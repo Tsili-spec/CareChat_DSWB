@@ -1,0 +1,20 @@
+2025-08-06 18:49:30,949 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:50:36,074 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:53:27,140 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:56:46,135 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:57:06,821 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:57:56,704 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:59:08,921 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:59:29,109 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:02:45,996 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:03:05,684 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:03:27,661 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:04:38,764 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:07:27,815 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:07:59,660 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:08:38,631 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:09:31,355 - app.api.patient - ERROR - Error listing patients: 
+2025-08-06 19:09:54,882 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:11:36,556 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:14:08,404 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:15:16,901 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}

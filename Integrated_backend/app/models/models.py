@@ -5,16 +5,30 @@ from datetime import datetime
 from bson import ObjectId
 import uuid
 
+from beanie import Document, Indexed
+from pydantic import Field, EmailStr, field_validator
+from typing import Optional, List
+from datetime import datetime
+from bson import ObjectId
+import uuid
+
 class Patient(Document):
     """Patient model for MongoDB using Beanie ODM"""
     
-    patient_id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
+    patient_id: Optional[str] = Field(default=None, alias="_id")
     full_name: str = Field(..., min_length=1, max_length=200)
     phone_number: str = Field(..., min_length=8, max_length=20)  # Will be indexed in Settings
     email: Optional[EmailStr] = None
     preferred_language: str = Field(default="en", max_length=10)
     password_hash: str = Field(...)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    @field_validator('patient_id', mode='before')
+    @classmethod
+    def validate_patient_id(cls, v):
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v or str(uuid.uuid4())
     
     class Settings:
         name = "patients"  # MongoDB collection name
