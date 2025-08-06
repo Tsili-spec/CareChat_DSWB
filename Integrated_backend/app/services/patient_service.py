@@ -175,7 +175,11 @@ class PatientService:
     @staticmethod
     async def get_patient_by_id(patient_id: str) -> Optional[PatientModel]:
         """Get patient by ID"""
-        return await PatientModel.find_one({"patient_id": patient_id})
+        try:
+            from bson import ObjectId
+            return await PatientModel.get(ObjectId(patient_id))
+        except Exception:
+            return None
     
     @staticmethod
     async def refresh_access_token(refresh_token: str) -> dict:
