@@ -41,7 +41,6 @@ class Patient(Document):
 class Feedback(Document):
     """Feedback model for MongoDB using Beanie ODM"""
     
-    feedback_id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
     patient_id: str = Field(...)
     rating: Optional[int] = Field(None, ge=1, le=5)
     feedback_text: Optional[str] = None

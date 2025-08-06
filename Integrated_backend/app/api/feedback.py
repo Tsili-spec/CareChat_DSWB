@@ -73,10 +73,10 @@ async def create_feedback(
         )
         
         await db_feedback.insert()
-        logger.info(f"Text feedback created successfully with ID: {db_feedback.feedback_id}")
+        logger.info(f"Text feedback created successfully with ID: {str(db_feedback.id)}")
         
         return Feedback(
-            feedback_id=db_feedback.feedback_id,
+            feedback_id=str(db_feedback.id),
             patient_id=db_feedback.patient_id,
             rating=db_feedback.rating,
             feedback_text=db_feedback.feedback_text,
@@ -159,7 +159,7 @@ async def create_audio_feedback(
         )
         
         await db_feedback.insert()
-        logger.info(f"Audio feedback created successfully with ID: {db_feedback.feedback_id}")
+        logger.info(f"Audio feedback created successfully with ID: {str(db_feedback.id)}")
         
         # Clean up uploaded file
         try:
@@ -168,7 +168,7 @@ async def create_audio_feedback(
             logger.warning(f"Failed to cleanup uploaded file: {cleanup_error}")
         
         return Feedback(
-            feedback_id=db_feedback.feedback_id,
+            feedback_id=str(db_feedback.id),
             patient_id=db_feedback.patient_id,
             rating=db_feedback.rating,
             feedback_text=db_feedback.feedback_text,
@@ -210,7 +210,12 @@ async def read_feedback(feedback_id: str):
     **Errors:**
     - 404: Feedback not found
     """
-    feedback = await FeedbackModel.find_one({"feedback_id": feedback_id})
+    try:
+        from bson import ObjectId
+        feedback = await FeedbackModel.get(ObjectId(feedback_id))
+    except Exception:
+        feedback = None
+        
     if not feedback:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -218,7 +223,7 @@ async def read_feedback(feedback_id: str):
         )
     
     return Feedback(
-        feedback_id=feedback.feedback_id,
+        feedback_id=str(feedback.id),
         patient_id=feedback.patient_id,
         rating=feedback.rating,
         feedback_text=feedback.feedback_text,
@@ -245,7 +250,7 @@ async def list_feedback():
         
         return [
             Feedback(
-                feedback_id=feedback.feedback_id,
+                feedback_id=str(feedback.id),
                 patient_id=feedback.patient_id,
                 rating=feedback.rating,
                 feedback_text=feedback.feedback_text,
@@ -280,7 +285,12 @@ async def delete_feedback(feedback_id: str):
     **Errors:**
     - 404: Feedback not found
     """
-    feedback = await FeedbackModel.find_one({"feedback_id": feedback_id})
+    try:
+        from bson import ObjectId
+        feedback = await FeedbackModel.get(ObjectId(feedback_id))
+    except Exception:
+        feedback = None
+        
     if not feedback:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
