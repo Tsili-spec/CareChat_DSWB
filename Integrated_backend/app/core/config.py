@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     TWILIO_NUMBER: str = os.getenv("TWILIO_NUMBER", "")
     MY_NUMBER: str = os.getenv("MY_NUMBER", "")
     
+    # LLM API Configuration
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+    
     # Application Settings
     PROJECT_NAME: str = "CareChat API"
     VERSION: str = "1.0.0"

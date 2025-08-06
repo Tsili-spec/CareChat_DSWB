@@ -96,3 +96,37 @@ class ReminderDelivery(Document):
             "delivery_status",
             "sent_at"
         ]
+
+class Conversation(Document):
+    """Conversation model for MongoDB using Beanie ODM"""
+    
+    patient_id: str = Field(...)  # Reference to Patient id
+    title: Optional[str] = Field(None, max_length=200)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    class Settings:
+        name = "conversations"
+        indexes = [
+            "patient_id",
+            "created_at",
+            "updated_at"
+        ]
+
+class ChatMessage(Document):
+    """Chat message model for MongoDB using Beanie ODM"""
+    
+    conversation_id: str = Field(...)  # Reference to Conversation id
+    role: str = Field(..., pattern="^(user|assistant)$")  # 'user' or 'assistant'
+    content: str = Field(...)
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    model_used: Optional[str] = Field(None, max_length=50)  # e.g., 'gemini-2.0-flash'
+    token_count: Optional[int] = Field(None, ge=0)
+    
+    class Settings:
+        name = "chat_messages"
+        indexes = [
+            "conversation_id",
+            "timestamp",
+            "role"
+        ]

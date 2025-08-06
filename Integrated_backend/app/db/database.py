@@ -2,7 +2,7 @@ import motor.motor_asyncio
 from beanie import init_beanie
 from app.core.config import settings
 from app.core.logging_config import get_logger
-from app.models.models import Patient, Feedback, Reminder, ReminderDelivery
+from app.models.models import Patient, Feedback, Reminder, ReminderDelivery, Conversation, ChatMessage
 
 logger = get_logger(__name__)
 
@@ -33,7 +33,7 @@ async def connect_to_mongo():
         # Initialize Beanie ODM with the models
         await init_beanie(
             database=db.database,
-            document_models=[Patient, Feedback, Reminder, ReminderDelivery]
+            document_models=[Patient, Feedback, Reminder, ReminderDelivery, Conversation, ChatMessage]
         )
         logger.info("✅ Beanie ODM initialized successfully!")
         

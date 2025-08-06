@@ -42,5 +42,14 @@ bcrypt
 
 numpy
 
+# RAG System Dependencies  
+sentence-transformers
+faiss-cpu
+pandas
+
+# LLM APIs
+groq
+google-generativeai
+
 # Additional dependencies for MongoDB
 bson
