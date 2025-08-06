@@ -182,6 +182,14 @@ const AddSample: React.FC = () => {
     window.location.href = '/dashboard';
   };
 
+  const navigateToForecasting = () => {
+    window.location.href = '/forecasting';
+  };
+
+  const navigateToFeedbackAnalytics = () => {
+    window.location.href = '/feedback-analytics';
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
@@ -200,14 +208,20 @@ const AddSample: React.FC = () => {
         </div>
         
         <div className="sidebar-menu">
-          <div className="menu-item active" onClick={navigateToAddSample}>
+          <div className="menu-item active" onClick={navigateToAddSample} title="Add Sample">
             <span className="menu-icon">+</span>
           </div>
-          <div className="menu-item" onClick={navigateToBloodUsage}>
+          <div className="menu-item" onClick={navigateToBloodUsage} title="Blood Usage">
             <span className="menu-icon">🩸</span>
           </div>
-          <div className="menu-item" onClick={navigateToDashboard}>
+          <div className="menu-item" onClick={navigateToDashboard} title="Dashboard">
+            <span className="menu-icon">🏠</span>
+          </div>
+          <div className="menu-item" onClick={navigateToForecasting} title="Forecasting">
             <span className="menu-icon">📊</span>
+          </div>
+          <div className="menu-item" onClick={navigateToFeedbackAnalytics} title="Feedback Analytics">
+            <span className="menu-icon">📈</span>
           </div>
         </div>
 

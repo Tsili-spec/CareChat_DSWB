@@ -266,6 +266,14 @@ const Forecasting: React.FC = () => {
     window.location.href = '/dashboard';
   };
 
+  const navigateToForecasting = () => {
+    window.location.href = '/forecasting';
+  };
+
+  const navigateToFeedbackAnalytics = () => {
+    window.location.href = '/feedback-analytics';
+  };
+
   const showMonitoringView = () => {
     setCurrentView('monitoring');
   };
@@ -1411,8 +1419,11 @@ const Forecasting: React.FC = () => {
           <div className="menu-item" onClick={navigateToDashboard} title="Dashboard">
             <span className="menu-icon">🏠</span>
           </div>
-          <div className="menu-item active" title="Forecasting">
-            <TrendingUp className="menu-icon" size={20} />
+          <div className="menu-item active" onClick={navigateToForecasting} title="Forecasting">
+            <span className="menu-icon">📊</span>
+          </div>
+          <div className="menu-item" onClick={navigateToFeedbackAnalytics} title="Feedback Analytics">
+            <span className="menu-icon">📈</span>
           </div>
         </div>
 

@@ -71,6 +71,10 @@ const Dashboard: React.FC = () => {
     window.location.href = '/dashboard';
   };
 
+  const navigateToFeedbackAnalytics = () => {
+    window.location.href = '/feedback-analytics';
+  };
+
 
   const getTimeToExpiryPercentage = (nearExpiry: number, total: number): number => {
     if (total === 0) return 0;
@@ -119,6 +123,9 @@ const Dashboard: React.FC = () => {
           </div>
           <div className="menu-item" onClick={navigateToForecasting} title="Forecasting">
             <span className="menu-icon">📊</span>
+          </div>
+          <div className="menu-item" onClick={navigateToFeedbackAnalytics} title="Feedback Analytics">
+            <span className="menu-icon">📈</span>
           </div>
         </div>
 
