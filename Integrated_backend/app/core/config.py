@@ -7,7 +7,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # Database Configuration
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "mongodb://stercytambong:w23N0S5Qb6kMUwTi@217.65.144.32:27017/carechat")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "mongodb://stercytambong:w23N0S5Qb6kMUwTi@217.65.144.32:27017")
     
     # JWT Configuration
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-super-secret-jwt-key-change-in-production")

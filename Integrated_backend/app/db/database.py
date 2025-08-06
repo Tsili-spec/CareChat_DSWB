@@ -17,19 +17,25 @@ async def connect_to_mongo():
     try:
         logger.info(f"Connecting to MongoDB at: {settings.DATABASE_URL.split('@')[1] if '@' in settings.DATABASE_URL else settings.DATABASE_URL}")
         
-        # Initialize the database client and connection
-        db.client = motor.motor_asyncio.AsyncIOMotorClient(settings.DATABASE_URL)
+        # Initialize the database client and connection with proper timeouts
+        db.client = motor.motor_asyncio.AsyncIOMotorClient(
+            settings.DATABASE_URL,
+            serverSelectionTimeoutMS=10000,
+            connectTimeoutMS=10000,
+            socketTimeoutMS=10000
+        )
         db.database = db.client.carechat  # Explicitly use carechat database
         
-        # Try to connect and ping the database
+        # Test the connection first
+        await db.client.admin.command('ping')
+        logger.info("✅ Successfully connected to MongoDB!")
+        
+        # Initialize Beanie ODM with the models
         await init_beanie(
             database=db.database,
             document_models=[Patient, Feedback, Reminder, ReminderDelivery]
         )
-        
-        # Test the connection
-        await db.client.admin.command('ping')
-        logger.info("✅ Successfully connected to MongoDB!")
+        logger.info("✅ Beanie ODM initialized successfully!")
         
     except Exception as e:
         logger.error(f"❌ Database connection failed: {e}")
@@ -39,7 +45,7 @@ async def connect_to_mongo():
 
 async def close_mongo_connection():
     """Close database connection"""
-    if db.client:
+    if db.client is not None:
         db.client.close()
         logger.info("MongoDB connection closed")
 

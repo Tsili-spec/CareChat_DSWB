@@ -30,12 +30,8 @@ async def lifespan(app: FastAPI):
     logger.info("🚀 Starting CareChat API...")
     
     # Connect to MongoDB
-    try:
-        await connect_to_mongo()
-        logger.info("✅ Database connected successfully")
-    except Exception as e:
-        logger.error(f"❌ Database connection failed: {e}")
-        raise
+    await connect_to_mongo()
+    logger.info("✅ Database initialization completed")
     
     # Check SMS service configuration
     if sms_service.is_configured():

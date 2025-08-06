@@ -46,7 +46,7 @@ async def signup(patient: PatientCreate):
     try:
         db_patient = await PatientService.create_patient(patient)
         return Patient(
-            patient_id=db_patient.patient_id,
+            patient_id=str(db_patient.id),
             full_name=db_patient.full_name,
             phone_number=db_patient.phone_number,
             email=db_patient.email,
@@ -180,7 +180,7 @@ async def get_patient_profile(patient_id: str = Query(..., description="Patient 
         )
     
     return Patient(
-        patient_id=patient.patient_id,
+        patient_id=str(patient.id),
         full_name=patient.full_name,
         phone_number=patient.phone_number,
         email=patient.email,
@@ -212,7 +212,7 @@ async def get_patient_by_path_id(patient_id: str):
         )
     
     return Patient(
-        patient_id=patient.patient_id,
+        patient_id=str(patient.id),
         full_name=patient.full_name,
         phone_number=patient.phone_number,
         email=patient.email,
@@ -245,7 +245,7 @@ async def list_patients(
         
         return [
             Patient(
-                patient_id=patient.patient_id,
+                patient_id=str(patient.id),
                 full_name=patient.full_name,
                 phone_number=patient.phone_number,
                 email=patient.email,

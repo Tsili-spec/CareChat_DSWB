@@ -1,0 +1,273 @@
+2025-08-06 18:49:29,095 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 18:49:29,095 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 18:49:30,949 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:49:30,950 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 18:49:30,950 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 18:49:30,951 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 18:49:30,951 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 18:49:30,951 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 18:49:30,951 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 18:49:30,951 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 18:50:16,669 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 18:50:16,670 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 18:50:16,671 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 18:50:34,417 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 18:50:34,417 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 18:50:36,074 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:50:36,074 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 18:50:36,074 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 18:50:36,074 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 18:50:36,075 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 18:50:36,075 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 18:50:36,075 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 18:50:36,075 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 18:53:06,815 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 18:53:06,816 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 18:53:06,816 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 18:53:25,439 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 18:53:25,439 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 18:53:27,140 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:53:27,141 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 18:53:27,141 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 18:53:27,141 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 18:53:27,141 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 18:53:27,141 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 18:53:27,141 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 18:53:27,142 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 18:56:25,334 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 18:56:25,335 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 18:56:25,335 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 18:56:44,097 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 18:56:44,097 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 18:56:46,135 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:56:46,136 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 18:56:46,137 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 18:56:46,137 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 18:56:46,137 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 18:56:46,137 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 18:56:46,138 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 18:56:46,138 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 18:57:04,468 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 18:57:04,468 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 18:57:06,821 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:57:06,822 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 18:57:06,822 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 18:57:06,822 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 18:57:06,822 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 18:57:06,823 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 18:57:06,823 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 18:57:06,823 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 18:57:38,026 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 18:57:38,027 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 18:57:38,027 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 18:57:55,730 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 18:57:55,731 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 18:57:56,704 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:57:56,704 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 18:57:56,704 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 18:57:56,705 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 18:57:56,705 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 18:57:56,705 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 18:57:56,705 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 18:57:56,706 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 18:58:47,266 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 18:58:47,266 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 18:58:47,267 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 18:59:07,932 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 18:59:07,932 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 18:59:08,921 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:59:08,922 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 18:59:08,922 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 18:59:08,923 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 18:59:08,923 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 18:59:08,923 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 18:59:08,923 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 18:59:08,924 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 18:59:28,139 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 18:59:28,140 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 18:59:29,109 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 18:59:29,109 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 18:59:29,109 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 18:59:29,109 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 18:59:29,109 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 18:59:29,109 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 18:59:29,109 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 18:59:29,110 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:02:23,390 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:02:23,391 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:02:23,392 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:02:44,353 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:02:44,353 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:02:45,996 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:02:45,998 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:02:45,999 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:02:45,999 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 19:02:45,999 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:02:45,999 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:02:46,000 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:02:46,000 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:03:04,253 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:03:04,254 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:03:05,684 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:03:05,685 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:03:05,685 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:03:05,686 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 19:03:05,686 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:03:05,686 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:03:05,686 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:03:05,687 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:03:26,398 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:03:26,398 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:03:27,661 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:03:27,661 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:03:27,661 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:03:27,661 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 19:03:27,662 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:03:27,662 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:03:27,662 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:03:27,662 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:04:18,916 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:04:18,917 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:04:18,918 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:04:37,690 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:04:37,690 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:04:38,764 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:04:38,765 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:04:38,765 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:04:38,765 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 19:04:38,765 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:04:38,766 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:04:38,766 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:04:38,766 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:05:32,482 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:05:32,483 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017
+2025-08-06 19:05:33,775 - app.db.database - INFO - ✅ Successfully connected to MongoDB!
+2025-08-06 19:05:36,865 - app.db.database - INFO - ✅ Beanie ODM initialized successfully!
+2025-08-06 19:05:36,866 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 19:05:36,866 - app.main - INFO - ✅ SMS service configured successfully
+2025-08-06 19:05:36,866 - app.main - INFO -    Twilio Account: AC810a610c...
+2025-08-06 19:05:36,866 - app.main - INFO -    Twilio Number: +12542765182
+2025-08-06 19:05:36,866 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:05:36,866 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:05:36,868 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:05:37,200 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:05:37,201 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:07:26,526 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:07:26,526 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:07:27,815 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:07:27,816 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:07:27,816 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:07:27,817 - app.main - INFO - ✅ Database connected successfully
+2025-08-06 19:07:27,817 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:07:27,817 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:07:27,817 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:07:27,817 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:07:40,762 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:07:40,763 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:07:40,763 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:07:58,071 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:07:58,072 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:07:59,660 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:07:59,661 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:07:59,661 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:07:59,661 - app.main - INFO - ✅ Database initialization completed
+2025-08-06 19:07:59,661 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:07:59,662 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:07:59,662 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:07:59,662 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:08:06,689 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:08:06,692 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:08:06,693 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:08:37,523 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:08:37,523 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:08:38,631 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:08:38,632 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:08:38,632 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:08:38,632 - app.main - INFO - ✅ Database initialization completed
+2025-08-06 19:08:38,632 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:08:38,632 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:08:38,632 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:08:38,633 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:08:50,053 - app.main - INFO - Request: GET http://localhost:8000/health
+2025-08-06 19:08:50,058 - app.main - INFO - Response Status: 200
+2025-08-06 19:08:50,058 - app.main - INFO - Response Time: 4.87ms
+2025-08-06 19:09:09,401 - app.main - INFO - Request: GET http://localhost:8000/docs?id=7fb97daa-fec7-45b2-b3f0-a08512151b83&vscodeBrowserReqId=1754503749384
+2025-08-06 19:09:09,403 - app.main - INFO - Response Status: 200
+2025-08-06 19:09:09,403 - app.main - INFO - Response Time: 1.74ms
+2025-08-06 19:09:09,739 - app.main - INFO - Request: GET http://localhost:8000/openapi.json
+2025-08-06 19:09:09,826 - app.main - INFO - Response Status: 200
+2025-08-06 19:09:09,826 - app.main - INFO - Response Time: 86.43ms
+2025-08-06 19:09:31,352 - app.main - INFO - Request: GET http://localhost:8000/api/patient/?limit=100&offset=0
+2025-08-06 19:09:31,355 - app.api.patient - ERROR - Error listing patients: 
+2025-08-06 19:09:31,357 - app.main - INFO - Response Status: 500
+2025-08-06 19:09:31,357 - app.main - INFO - Response Time: 4.61ms
+2025-08-06 19:09:33,498 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:09:33,499 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:09:33,499 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:09:53,249 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:09:53,249 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:09:54,882 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:09:54,883 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:09:54,883 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:09:54,883 - app.main - INFO - ✅ Database initialization completed
+2025-08-06 19:09:54,883 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:09:54,883 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:09:54,883 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:09:54,884 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:10:02,462 - app.main - INFO - Request: GET http://localhost:8000/health
+2025-08-06 19:10:02,465 - app.main - INFO - Response Status: 200
+2025-08-06 19:10:02,466 - app.main - INFO - Response Time: 3.58ms
+2025-08-06 19:10:02,478 - app.main - INFO - Request: GET http://localhost:8000/docs
+2025-08-06 19:10:02,480 - app.main - INFO - Response Status: 200
+2025-08-06 19:10:02,481 - app.main - INFO - Response Time: 2.13ms
+2025-08-06 19:10:02,491 - app.main - INFO - Request: GET http://localhost:8000/openapi.json
+2025-08-06 19:10:02,576 - app.main - INFO - Response Status: 200
+2025-08-06 19:10:02,576 - app.main - INFO - Response Time: 85.00ms
+2025-08-06 19:10:51,179 - app.main - INFO - Request: GET http://localhost:8000/health
+2025-08-06 19:10:51,182 - app.main - INFO - Response Status: 200
+2025-08-06 19:10:51,183 - app.main - INFO - Response Time: 3.31ms
+2025-08-06 19:10:51,191 - app.main - INFO - Request: GET http://localhost:8000/docs
+2025-08-06 19:10:51,193 - app.main - INFO - Response Status: 200
+2025-08-06 19:10:51,194 - app.main - INFO - Response Time: 2.18ms
+2025-08-06 19:10:51,204 - app.main - INFO - Request: GET http://localhost:8000/openapi.json
+2025-08-06 19:10:51,208 - app.main - INFO - Response Status: 200
+2025-08-06 19:10:51,208 - app.main - INFO - Response Time: 3.68ms
+2025-08-06 19:11:15,218 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:11:15,219 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:11:15,220 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:11:35,160 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:11:35,160 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:11:36,556 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:11:36,557 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:11:36,557 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:11:36,557 - app.main - INFO - ✅ Database initialization completed
+2025-08-06 19:11:36,557 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:11:36,557 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:11:36,557 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:11:36,558 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:13:45,936 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:13:45,936 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:13:45,938 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:14:07,434 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:14:07,434 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:14:08,404 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:14:08,404 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:14:08,405 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:14:08,405 - app.main - INFO - ✅ Database initialization completed
+2025-08-06 19:14:08,405 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:14:08,406 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:14:08,406 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:14:08,406 - app.main - INFO - 🎉 CareChat API startup complete!
+2025-08-06 19:14:53,252 - app.main - INFO - 🛑 Shutting down CareChat API...
+2025-08-06 19:14:53,254 - app.db.database - INFO - MongoDB connection closed
+2025-08-06 19:14:53,255 - app.main - INFO - 👋 CareChat API shutdown complete!
+2025-08-06 19:15:15,886 - app.main - INFO - 🚀 Starting CareChat API...
+2025-08-06 19:15:15,886 - app.db.database - INFO - Connecting to MongoDB at: 217.65.144.32:27017/carechat
+2025-08-06 19:15:16,901 - app.db.database - ERROR - ❌ Database connection failed: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+2025-08-06 19:15:16,901 - app.db.database - WARNING - ⚠️  Server will start without database connection
+2025-08-06 19:15:16,901 - app.db.database - WARNING - ⚠️  Database-dependent features will not work
+2025-08-06 19:15:16,901 - app.main - INFO - ✅ Database initialization completed
+2025-08-06 19:15:16,901 - app.main - WARNING - ⚠️  SMS service not configured - check environment variables
+2025-08-06 19:15:16,902 - app.main - WARNING -    Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_NUMBER, MY_NUMBER
+2025-08-06 19:15:16,902 - app.main - INFO - 📅 Reminder scheduler ready (start via /api/reminder/start-scheduler)
+2025-08-06 19:15:16,902 - app.main - INFO - 🎉 CareChat API startup complete!
