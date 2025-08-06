@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard'
 import AddSample from './components/AddSample'
 import BloodUsage from './components/BloodUsage'
 import Forecasting from './components/Forecasting'
+import FeedbackAnalytics from './components/FeedbackAnalytics'
 import './App.css'
 
 // Check if user is authenticated
@@ -53,6 +54,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Forecasting />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/feedback-analytics" 
+            element={
+              <ProtectedRoute>
+                <FeedbackAnalytics />
               </ProtectedRoute>
             } 
           />
