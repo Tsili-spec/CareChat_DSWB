@@ -1,0 +1,46 @@
+pydub
+openai-whisper
+torch
+deep-translator
+
+# FastAPI backend
+fastapi
+uvicorn
+
+# MongoDB
+motor
+pymongo
+beanie
+
+# Pydantic for schema validation
+pydantic
+pydantic[email]
+
+# Translation service
+textblob
+
+# NLP and ML for advanced analysis
+spacy
+scikit-learn
+
+# Other utilities
+python-dotenv
+
+# Pydantic settings
+pydantic-settings
+
+# FastAPI form data support
+python-multipart
+
+# Twilio SMS/voice integration
+twilio
+
+# Authentication & Security
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+
+numpy
+
+# Additional dependencies for MongoDB
+bson
