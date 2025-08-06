@@ -1,0 +1,39 @@
+{
+  "name": "carechat-migration-tools",
+  "version": "1.0.0",
+  "description": "Database migration tools for CareChat PostgreSQL to MongoDB migration",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "node src/migrate.js",
+    "migrate:track1": "node src/migrateTrack1.js",
+    "migrate:track2": "node src/migrateTrack2.js",
+    "validate": "node src/validate.js",
+    "rollback": "node src/rollback.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "mongodb": "^6.3.0",
+    "pg": "^8.11.3",
+    "dotenv": "^16.3.1",
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0",
+    "chalk": "^4.1.2",
+    "progress": "^2.0.3",
+    "async": "^3.2.4",
+    "moment": "^2.29.4",
+    "lodash": "^4.17.21",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "keywords": [
+    "migration",
+    "postgresql",
+    "mongodb",
+    "database",
+    "carechat"
+  ],
+  "author": "CareChat Team",
+  "license": "MIT"
+}

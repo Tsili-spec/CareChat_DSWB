@@ -8,7 +8,6 @@ from app.models.user import User
 from app.models.blood_collection import BloodCollection
 from app.models.blood_usage import BloodUsage
 from app.models.blood_stock import BloodStock
-from app.admin.config import configure_admin
 import logging
 
 # Configure logging
@@ -58,10 +57,6 @@ app.add_middleware(
 # Include routers with proper tags
 app.include_router(auth_router, prefix=settings.API_V1_STR, tags=["Authentication"])
 app.include_router(blood_bank_router, prefix=settings.API_V1_STR, tags=["Blood Bank Management"])
-
-# Configure admin interface (must be done before startup events)
-configure_admin(app)
-logger.info("Admin interface configured successfully")
 
 @app.get("/", tags=["System"])
 def read_root():
