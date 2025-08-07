@@ -4,6 +4,7 @@ Conversation and Chat Message Pydantic schemas for MongoDB/Beanie
 from pydantic import BaseModel, Field
 from typing import Optional, List, Literal
 from datetime import datetime
+from fastapi import UploadFile
 
 class ChatMessageCreate(BaseModel):
     user_id: str = Field(..., description="The user's patient ID")
@@ -17,6 +18,20 @@ class ChatMessageResponse(BaseModel):
     content: str
     timestamp: datetime
     model_used: Optional[str] = None
+
+class AudioChatRequest(BaseModel):
+    user_id: str = Field(..., description="The user's patient ID")
+    conversation_id: Optional[str] = Field(None, description="Existing conversation ID (if continuing)")
+    provider: Optional[Literal["gemini", "groq"]] = Field(default="groq", description="LLM provider to use")
+
+class AudioChatResponse(BaseModel):
+    conversation_id: str
+    transcribed_text: str
+    detected_language: str
+    transcription_confidence: float
+    user_message: ChatMessageResponse
+    assistant_message: ChatMessageResponse
+    provider: str = "groq"
 
 class ConversationResponse(BaseModel):
     conversation_id: str

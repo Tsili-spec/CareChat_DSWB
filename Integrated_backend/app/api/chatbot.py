@@ -2,14 +2,18 @@
 Multi-LLM Chat endpoint for CareChat with Conversational Memory and RAG
 Adapted for MongoDB with Beanie ODM
 """
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from app.services.llm_service import llm_service
 from app.services.conversation_service import conversation_memory
 from app.services.rag_service import rag_service
-from app.schemas.conversation import ChatMessageCreate, ChatResponse, ConversationHistoryResponse, ConversationResponse
+from app.services.transcription import transcribe_audio
+from app.schemas.conversation import (
+    ChatMessageCreate, ChatResponse, ConversationHistoryResponse, 
+    ConversationResponse, AudioChatRequest, AudioChatResponse, ChatMessageResponse
+)
 from app.models.models import Patient, Conversation, ChatMessage
 import logging
-from typing import List
+from typing import List, Optional
 from bson import ObjectId
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
@@ -123,6 +127,158 @@ async def chat_with_memory(request: ChatMessageCreate):
         raise HTTPException(
             status_code=500,
             detail=f"Chat service error: {str(e)}"
+        )
+
+@router.post("/audio", response_model=AudioChatResponse)
+async def chat_with_audio(
+    audio: UploadFile = File(..., description="Audio file to transcribe"),
+    user_id: str = Form(..., description="The user's patient ID"),
+    conversation_id: Optional[str] = Form(None, description="Existing conversation ID (if continuing)"),
+    provider: Optional[str] = Form("groq", description="LLM provider to use")
+):
+    """
+    Send an audio message to AI with conversational memory.
+    
+    This endpoint:
+    1. Receives an audio file from the frontend
+    2. Transcribes the audio to text using Whisper
+    3. Processes the transcribed text through the same chat logic as the text endpoint
+    4. Returns both the transcription details and chat response
+    
+    Supported audio formats: WAV, MP3, M4A, FLAC, OGG
+    """
+    try:
+        logger.info(f"Audio chat request from user {user_id}, file: {audio.filename}")
+        
+        # Validate provider
+        if provider not in ["gemini", "groq"]:
+            provider = "groq"
+        
+        # Validate audio file
+        if not audio.filename:
+            raise HTTPException(status_code=400, detail="No audio file provided")
+        
+        # Check file size (limit to 25MB)
+        if audio.size and audio.size > 25 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="Audio file too large (max 25MB)")
+        
+        # Read audio file
+        audio_data = await audio.read()
+        if not audio_data:
+            raise HTTPException(status_code=400, detail="Empty audio file")
+        
+        # Transcribe audio
+        logger.info("Transcribing audio...")
+        transcription_result = transcribe_audio(audio_data)
+        
+        if not transcription_result["text"].strip():
+            raise HTTPException(status_code=400, detail="Could not transcribe audio or audio is silent")
+        
+        transcribed_text = transcription_result["text"].strip()
+        detected_language = transcription_result["language"]
+        confidence = transcription_result["confidence"]
+        
+        logger.info(f"Transcription successful: '{transcribed_text[:50]}...' (language: {detected_language}, confidence: {confidence:.2f})")
+        
+        # Verify user exists
+        try:
+            patient = await Patient.find_one(Patient.id == ObjectId(user_id))
+            if not patient:
+                raise HTTPException(status_code=404, detail="Patient not found")
+        except Exception:
+            # Try with string ID if ObjectId fails
+            patient = await Patient.find_one(Patient.patient_id == user_id)
+            if not patient:
+                raise HTTPException(status_code=404, detail="Patient not found")
+            # Use the string patient_id for consistency
+            user_id = patient.patient_id or str(patient.id)
+        
+        # Get or create conversation
+        conversation = await conversation_memory.get_or_create_conversation(
+            user_id=user_id,
+            conversation_id=conversation_id
+        )
+        
+        # Get conversation context (previous messages)
+        context_messages = await conversation_memory.get_conversation_context(
+            conversation_id=str(conversation.id)
+        )
+        
+        # Add user message to conversation
+        user_message = await conversation_memory.add_message(
+            conversation_id=str(conversation.id),
+            role="user",
+            content=transcribed_text
+        )
+        
+        # Format context for LLM
+        context = conversation_memory.format_context_for_llm(context_messages)
+        
+        # Prepare base prompt with context
+        if context:
+            base_prompt = f"{context}\nHuman: {transcribed_text}"
+        else:
+            base_prompt = transcribed_text
+        
+        # Enhance prompt with RAG if medical context is relevant
+        enhanced_prompt = await rag_service.get_rag_enhanced_prompt(
+            user_message=transcribed_text,
+            base_prompt=base_prompt
+        )
+        
+        # Generate title for new conversations
+        if not conversation.title and len(context_messages) == 0:
+            title = conversation_memory.auto_generate_title(transcribed_text)
+            await conversation_memory.update_conversation_title(
+                conversation_id=str(conversation.id),
+                title=title
+            )
+        
+        # Get response from specified LLM provider with healthcare guidelines
+        response_text = await llm_service.generate_response(
+            enhanced_prompt,
+            provider=provider,
+            temperature=0.3
+        )
+        
+        # Add assistant message to conversation
+        model_name = f"{provider}-2.0-flash" if provider == "gemini" else "gemma2-9b-it"
+        assistant_message = await conversation_memory.add_message(
+            conversation_id=str(conversation.id),
+            role="assistant",
+            content=response_text,
+            model_used=model_name
+        )
+        
+        return AudioChatResponse(
+            conversation_id=str(conversation.id),
+            transcribed_text=transcribed_text,
+            detected_language=detected_language,
+            transcription_confidence=confidence,
+            user_message=ChatMessageResponse(
+                message_id=str(user_message.id),
+                role=user_message.role,
+                content=user_message.content,
+                timestamp=user_message.timestamp,
+                model_used=user_message.model_used
+            ),
+            assistant_message=ChatMessageResponse(
+                message_id=str(assistant_message.id),
+                role=assistant_message.role,
+                content=assistant_message.content,
+                timestamp=assistant_message.timestamp,
+                model_used=assistant_message.model_used
+            ),
+            provider=provider
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Audio chat endpoint error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Audio chat service error: {str(e)}"
         )
 
 @router.get("/conversations/{user_id}", response_model=List[ConversationResponse])
