@@ -1009,9 +1009,7 @@ const Forecasting: React.FC = () => {
         </div>
       </div>
       
-      <div className="coming-soon">
-        <p>🚀 Advanced forecasting features coming soon!</p>
-      </div>
+  
     </div>
   );
 
