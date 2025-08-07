@@ -81,6 +81,16 @@ async def health_check():
         "schema": "blood_collections, blood_usage, blood_stock, users"
     }
 
+# Configure admin panel
+try:
+    from app.admin.config import configure_admin
+    admin_site = configure_admin(app)
+    logger.info("Admin panel mounted successfully at /admin")
+except ImportError as e:
+    logger.warning(f"Admin panel not available: {e}")
+except Exception as e:
+    logger.error(f"Failed to configure admin panel: {e}")
+
 
 
 

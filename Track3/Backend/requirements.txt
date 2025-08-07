@@ -29,3 +29,6 @@ scipy
 pytest
 pytest-asyncio
 python-dotenv
+
+# Admin Interface
+fastapi-amis-admin
