@@ -1,0 +1,48 @@
+name: Deploy Track2 Backend
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Track2/Backend/**'  # Only deploy when Track2/Backend changes
+  workflow_dispatch:  # Allow manual deployment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: 217.65.144.32
+        username: root
+        password: Simbtech@2025
+        port: 22
+        script: |
+          # Navigate to project directory
+          cd /var/www/hackathon/CareChat_DSWB
+          
+          # Pull latest changes
+          git pull origin main
+          
+          # Navigate to Backend directory
+          cd Track2/Backend
+          
+          # Install/update dependencies (no virtual environment)
+          pip install -r requirements.txt
+          
+          # Restart PM2 process (or start if not running)
+          pm2 restart carechat-backend || pm2 start start_app.py \
+            --name "carechat-backend" \
+            --interpreter python3 \
+            --cwd "/var/www/hackathon/CareChat_DSWB/Track2/Backend"
+          
+          # Save PM2 configuration
+          pm2 save
+          
+          # Show final status
+          pm2 list
