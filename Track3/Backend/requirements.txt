@@ -32,3 +32,4 @@ python-dotenv
 
 # Admin Interface
 fastapi-amis-admin
+asyncpg
