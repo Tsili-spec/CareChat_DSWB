@@ -10,6 +10,9 @@ This is a complete FastAPI implementation of the CareChat backend system with Mo
 - **AI-Powered Analysis**: Sentiment analysis, topic extraction, and urgency detection
 - **SMS Integration**: Twilio-based SMS notifications for reminders
 - **MongoDB Integration**: Using Beanie ODM for elegant MongoDB operations
+- **Intelligent Chat System**: AI-powered conversational chat with RAG (Retrieval-Augmented Generation)
+- **Audio Chat Support**: Voice message transcription and processing through Whisper
+- **Medical Knowledge RAG**: 50,000+ clinical summaries for context-aware medical responses
 
 ## Quick Start
 
@@ -69,6 +72,14 @@ MY_NUMBER=your_phone_number_for_testing
 ```
 
 ## API Endpoints
+
+### Chat Endpoints
+
+- `POST /api/chat/` - Send text message to AI with conversational memory
+- `POST /api/chat/audio` - Send audio message (transcribed and processed as text)
+- `GET /api/chat/conversations/{user_id}` - Get all conversations for a user
+- `GET /api/chat/conversations/{conversation_id}/history` - Get conversation history
+- `DELETE /api/chat/conversations/{conversation_id}` - Delete conversation
 
 ### Authentication Endpoints
 
@@ -252,6 +263,27 @@ curl -X POST "http://localhost:8000/api/reminder/" \
     "scheduled_time": ["2024-01-15T08:00:00Z"],
     "days": ["monday", "tuesday", "wednesday", "thursday", "friday"],
     "status": "active"
+  }'
+```
+
+### 5. Send Audio Message
+
+```bash
+curl -X POST "http://localhost:8000/api/chat/audio" \
+  -F "audio=@recording.wav" \
+  -F "user_id=YOUR_PATIENT_ID" \
+  -F "provider=groq"
+```
+
+### 6. Send Text Chat Message
+
+```bash
+curl -X POST "http://localhost:8000/api/chat/" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "YOUR_PATIENT_ID",
+    "message": "What are the symptoms of diabetes?",
+    "provider": "groq"
   }'
 ```
 
