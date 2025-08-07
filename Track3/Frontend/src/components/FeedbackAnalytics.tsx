@@ -37,7 +37,7 @@ const FeedbackAnalytics = () => {
     try {
       setLoading(true)
       // Note: You'll need to replace this with the actual Track3 feedback API endpoint
-      const response = await fetch('https://carechat-dswb-v8ex.onrender.com/api/summary')
+      const response = await fetch('http://217.65.144.32:8000/api/dashboard/stats')
       if (!response.ok) {
         throw new Error('Failed to fetch data')
       }
@@ -346,7 +346,7 @@ const FeedbackAnalytics = () => {
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                    label={({ name, percent }: { name: string; percent?: number }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
                     outerRadius={100}
                     fill="#8884d8"
                     dataKey="value"
